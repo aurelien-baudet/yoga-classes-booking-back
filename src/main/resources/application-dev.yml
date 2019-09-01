@@ -1,0 +1,15 @@
+cors:
+  allowed-origins: "*"
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+
+#spring:
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: 846418150945-l87u18f42ncvr0teel6cd6kjioepjaud.apps.googleusercontent.com
+#            client-secret: QgCd3xv6BYwfRIxawJQ_Q7dS

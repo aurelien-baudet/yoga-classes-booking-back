@@ -1,0 +1,18 @@
+cors:
+  allowed-methods: GET,POST,OPTIONS,PATCH,PUT,DELETE
+  allowed-headers: Access-Control-Allow-Origin,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With
+
+logging:
+  level:
+    org.reflections.Reflections: ERROR
+    
+spring:
+  jackson:
+    deserialization:
+      accept-empty-array-as-null-object: false
+      accept-empty-string-as-null-object: false
+      read-date-timestamps-as-nanoseconds: false
+    serialization:
+      write-durations-as-timestamps: true
+      write-dates-as-timestamps: true
+      write-date-timestamps-as-nanoseconds: false
