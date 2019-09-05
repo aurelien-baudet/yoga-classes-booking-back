@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers(POST, "/users/teachers").permitAll()
 				.antMatchers(GET, "/classes").permitAll()
 				.antMatchers(GET, "/classes/*").permitAll()
+				.antMatchers(GET, "/places").permitAll()
 				// for unregistered users
 				.antMatchers(GET, "/classes/bookings").permitAll()
 				.antMatchers(POST, "/classes/*/bookings").permitAll()

@@ -6,11 +6,13 @@ import static org.springframework.data.domain.Sort.Order.asc;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.Teacher;
+import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
@@ -39,12 +41,12 @@ public class ClassService {
 		return scheduledClassRepository.save(scheduledClass);
 	}
 	
-	public ScheduledClass cancel(ScheduledClass scheduledClass) throws ScheduledClassException {
+	public ScheduledClass cancel(ScheduledClass scheduledClass, CancelData addtionalInfo) throws ScheduledClassException {
 		// update class
 		scheduledClass.setState(CANCELED);
 		ScheduledClass updated = scheduledClassRepository.save(scheduledClass);
 		// notify every participant
-		notificationService.classCanceled(updated);
+		notificationService.classCanceled(updated, addtionalInfo);
 		return updated;
 	}
 	
@@ -71,5 +73,17 @@ public class ClassService {
 		// notify every participant
 		notificationService.placeChanged(updated, oldPlace, newPlace);
 		return updated;
+	}
+
+	public List<ScheduledClass> listClassesFor(Lesson lesson, Instant from, Instant to) {
+		return scheduledClassRepository.findByLessonAndStartAfterAndEndBefore(lesson, Optional.ofNullable(from), Optional.ofNullable(to));
+	}
+
+	public List<Lesson> listLessons() {
+		return lessonRepository.findAll();
+	}
+
+	public List<Lesson> listUnscheduledLessons() {
+		return lessonRepository.findAllUnscheduled();
 	}
 }

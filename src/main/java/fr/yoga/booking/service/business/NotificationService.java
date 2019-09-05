@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NotificationService {
 
-	public void classCanceled(ScheduledClass scheduledClass) {
+	public void classCanceled(ScheduledClass scheduledClass, CancelData addtionalInfo) {
 		
 	}
 
@@ -24,7 +25,7 @@ public class NotificationService {
 		
 	}
 
-	public void bookingCanceled(ScheduledClass bookedClass, StudentInfo student, User canceledBy) {
+	public void unbooked(ScheduledClass bookedClass, StudentInfo student, User canceledBy) {
 		
 	}
 

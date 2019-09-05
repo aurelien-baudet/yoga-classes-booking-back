@@ -56,19 +56,19 @@ public class BookingController {
 	}
 	
 	@DeleteMapping("{classId}/bookings/{studentId}")
-	public ScheduledClassDto cancel(@PathVariable("classId") String classId, @PathVariable("studentId") String studentId, @AuthenticationPrincipal UserDetailsWrapper currentUser) throws UserException, ScheduledClassException, BookingException {
+	public ScheduledClassDto unbook(@PathVariable("classId") String classId, @PathVariable("studentId") String studentId, @AuthenticationPrincipal UserDetailsWrapper currentUser) throws UserException, ScheduledClassException, BookingException {
 		User canceledBy = userService.getUser(currentUser != null ? currentUser.getUser().getId() : studentId);
 		Student student = userService.getStudent(studentId);
 		ScheduledClass bookedClass = classService.getClass(classId);
-		return classMapper.toDto(bookingService.cancel(bookedClass, student, canceledBy));
+		return classMapper.toDto(bookingService.unbook(bookedClass, student, canceledBy));
 	}
 	
 	@DeleteMapping("{classId}/bookings")
-	public ScheduledClassDto cancel(@PathVariable("classId") String classId, @RequestBody UnregisteredUser student) throws UserException, ScheduledClassException, BookingException {
+	public ScheduledClassDto unbook(@PathVariable("classId") String classId, @RequestBody UnregisteredUser student) throws UserException, ScheduledClassException, BookingException {
 		// TODO: handle case where a connected user cancels for another unregistered user
 //		User canceledBy = userService.getUser(currentUser != null ? currentUser.getUser().getId() : studentId);
 		ScheduledClass bookedClass = classService.getClass(classId);
-		return classMapper.toDto(bookingService.cancel(bookedClass, student, null));
+		return classMapper.toDto(bookingService.unbook(bookedClass, student, null));
 	}
 	
 	@GetMapping("bookings/{studentId}")

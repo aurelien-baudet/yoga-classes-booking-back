@@ -36,12 +36,12 @@ public class BookingService {
 		return book(bookedClass, new StudentInfo(student), bookedBy);
 	}
 
-	public ScheduledClass cancel(ScheduledClass bookedClass, Student student, User canceledBy) throws BookingException {
-		return cancel(bookedClass, new StudentInfo(student), canceledBy);
+	public ScheduledClass unbook(ScheduledClass bookedClass, Student student, User canceledBy) throws BookingException {
+		return unbook(bookedClass, new StudentInfo(student), canceledBy);
 	}
 
-	public ScheduledClass cancel(ScheduledClass bookedClass, UnregisteredUser student, User canceledBy) throws BookingException {
-		return cancel(bookedClass, new StudentInfo(student), canceledBy);
+	public ScheduledClass unbook(ScheduledClass bookedClass, UnregisteredUser student, User canceledBy) throws BookingException {
+		return unbook(bookedClass, new StudentInfo(student), canceledBy);
 	}
 	
 	public List<ScheduledClass> listBookedClassesBy(Student student) {
@@ -79,14 +79,14 @@ public class BookingService {
 		return updatedClass;
 	}
 
-	private ScheduledClass cancel(ScheduledClass bookedClass, StudentInfo student, User canceledBy) throws NotBookedException {
+	private ScheduledClass unbook(ScheduledClass bookedClass, StudentInfo student, User canceledBy) throws NotBookedException {
 		if(notBooked(bookedClass, student)) {
 			throw new NotBookedException(bookedClass, student);
 		}
 		ScheduledClass updatedClass = removeBookingForStudent(bookedClass, student);
 		updatedClass = scheduledClassRepository.save(updatedClass);
 		// notify student
-		notificationService.bookingCanceled(updatedClass, student, canceledBy);
+		notificationService.unbooked(updatedClass, student, canceledBy);
 		return updatedClass;
 	}
 
