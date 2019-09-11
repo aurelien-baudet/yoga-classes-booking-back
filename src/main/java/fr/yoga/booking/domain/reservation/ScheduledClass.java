@@ -1,7 +1,5 @@
 package fr.yoga.booking.domain.reservation;
 
-import static fr.yoga.booking.domain.reservation.ClassState.OPENED;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +23,10 @@ public class ScheduledClass {
 	private List<Booking> bookings;
 	
 	public ScheduledClass() {
-		this(null, null, null, null, OPENED, new ArrayList<>());
+		this(null, null, null, null, new Opened(), new ArrayList<>());
 	}
 	
 	public ScheduledClass(Instant start, Instant end, Lesson lesson) {
-		this(null, start, end, lesson, OPENED, new ArrayList<>());
+		this(null, start, end, lesson, new Opened(), new ArrayList<>());
 	}
 }

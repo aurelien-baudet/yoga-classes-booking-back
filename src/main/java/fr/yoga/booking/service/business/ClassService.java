@@ -1,6 +1,5 @@
 package fr.yoga.booking.service.business;
 
-import static fr.yoga.booking.domain.reservation.ClassState.CANCELED;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.springframework.data.domain.Sort.Order.asc;
 
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.reservation.CancelData;
+import fr.yoga.booking.domain.reservation.Canceled;
 import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
@@ -43,7 +43,7 @@ public class ClassService {
 	
 	public ScheduledClass cancel(ScheduledClass scheduledClass, CancelData addtionalInfo) throws ScheduledClassException {
 		// update class
-		scheduledClass.setState(CANCELED);
+		scheduledClass.setState(new Canceled(addtionalInfo.getMessage()));
 		ScheduledClass updated = scheduledClassRepository.save(scheduledClass);
 		// notify every participant
 		notificationService.classCanceled(updated, addtionalInfo);
