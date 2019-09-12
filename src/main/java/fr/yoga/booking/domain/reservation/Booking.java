@@ -1,6 +1,7 @@
 package fr.yoga.booking.domain.reservation;
 
 import java.time.Instant;
+import java.util.Comparator;
 
 import javax.validation.constraints.NotNull;
 
@@ -23,13 +24,14 @@ public class Booking {
 	private User bookedBy;
 	@NotNull
 	private StudentInfo student;
+	private boolean approved;
 	
-	public Booking(Instant bookDate, User bookedBy, Student student) {
-		this(bookDate, bookedBy, new StudentInfo(student));
+	public Booking(Instant bookDate, User bookedBy, Student student, boolean approved) {
+		this(bookDate, bookedBy, new StudentInfo(student), approved);
 	}
 
-	public Booking(Instant bookDate, User bookedBy, UnregisteredUser student) {
-		this(bookDate, bookedBy, new StudentInfo(student));
+	public Booking(Instant bookDate, User bookedBy, UnregisteredUser student, boolean approved) {
+		this(bookDate, bookedBy, new StudentInfo(student), approved);
 	}
 	
 	public boolean isForStudent(StudentInfo student) {
@@ -55,5 +57,13 @@ public class Booking {
 			return bookedBy == null;
 		}
 		return this.bookedBy.isSame(bookedBy);
+	}
+	
+	
+	public static class SortByAscendingDateComparator implements Comparator<Booking> {
+		@Override
+		public int compare(Booking o1, Booking o2) {
+			return o1.getBookDate().compareTo(o2.getBookDate());
+		}
 	}
 }
