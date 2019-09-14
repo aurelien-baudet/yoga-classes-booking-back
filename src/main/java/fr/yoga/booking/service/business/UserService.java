@@ -12,6 +12,7 @@ import fr.yoga.booking.domain.account.Preferences;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.User;
+import fr.yoga.booking.domain.reservation.StudentInfo;
 import fr.yoga.booking.repository.StudentRepository;
 import fr.yoga.booking.repository.TeacherRepository;
 import fr.yoga.booking.service.business.exception.AlreadyRegisteredUser;
@@ -74,6 +75,20 @@ public class UserService {
 		// store new user
 		return teacherRepository.save(teacher);
 	}
+	
+	public StudentInfo anonymize(StudentInfo student) throws UserException {
+		// TODO: if current user => show info ?
+		// TODO: if current user booked for friend and student is the friend => show info ?
+		if(!student.isRegistered()) {
+			// TODO: display name of unregistered users or anonymize by default ?
+			return student;
+		}
+		User user = getUser(student.getId());
+		if(visibleByOtherStudents(user)) {
+			return student;
+		}
+		return new StudentInfo(student.getId(), "<anonyme>", student.getEmail(), student.getPhoneNumber());
+	}
 
 	private boolean exists(User user) {
 		boolean existsAsStudent = studentRepository.existsByAccountLogin(user.getAccount().getLogin());
@@ -85,5 +100,12 @@ public class UserService {
 			return true;
 		}
 		return false;
+	}
+
+	private boolean visibleByOtherStudents(User user) {
+		if(!(user instanceof Student)) {
+			return true;
+		}
+		return ((Student) user).getPreferences().isVisibleByOtherStudents();
 	}
 }
