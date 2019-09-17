@@ -30,6 +30,7 @@ public class ClassService {
 	private final ScheduledClassRepository scheduledClassRepository;
 	private final LessonRepository lessonRepository;
 	private final NotificationService notificationService;
+	private final ReminderService reminderService;
 
 	public Lesson register(LessonInfo data, Place place, Teacher teacher) throws ScheduledClassException {
 		Lesson lesson = new Lesson(data, place, teacher);
@@ -38,13 +39,16 @@ public class ClassService {
 	
 	public ScheduledClass schedule(Lesson lesson, Instant start, Instant end) throws ScheduledClassException {
 		ScheduledClass scheduledClass = new ScheduledClass(start, end, lesson);
-		return scheduledClassRepository.save(scheduledClass);
+		ScheduledClass savedClass = scheduledClassRepository.save(scheduledClass);
+		reminderService.registerReminderForClass(savedClass);
+		return savedClass;
 	}
 	
 	public ScheduledClass cancel(ScheduledClass scheduledClass, CancelData addtionalInfo) throws ScheduledClassException {
 		// update class
 		scheduledClass.setState(new Canceled(addtionalInfo.getMessage()));
 		ScheduledClass updated = scheduledClassRepository.save(scheduledClass);
+		reminderService.unregisterReminderForClass(updated);
 		// notify every participant
 		notificationService.classCanceled(updated, addtionalInfo);
 		return updated;

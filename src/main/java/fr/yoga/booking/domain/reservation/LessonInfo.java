@@ -12,7 +12,7 @@ public class LessonInfo {
 	private String title;
 	private String description;
 	private int maxStudents;
-	private List<Photo> photos;
+	private List<Image> photos;
 	
 	public LessonInfo() {
 		this(null, null, 0, new ArrayList<>());

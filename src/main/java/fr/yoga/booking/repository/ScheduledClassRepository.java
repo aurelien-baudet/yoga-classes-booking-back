@@ -10,4 +10,6 @@ import fr.yoga.booking.domain.reservation.ScheduledClass;
 
 public interface ScheduledClassRepository extends MongoRepository<ScheduledClass, String>, CustomizedScheduledClassRepository {
 	List<ScheduledClass> findByStartAfter(Instant date, Sort sortBy);
+
+	List<ScheduledClass> findByStartBetween(Instant before, Instant after);
 }

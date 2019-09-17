@@ -68,4 +68,11 @@ public class ScheduledClass {
 		addBooking(booking);
 		return this;
 	}
+	
+	public List<StudentInfo> allStudents() {
+		return getBookings()
+				.stream()
+				.map(b -> b.getStudent())
+				.collect(toList());
+	}
 }

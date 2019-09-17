@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.account.User;
+import fr.yoga.booking.domain.notification.Reminder;
 import fr.yoga.booking.domain.reservation.Booking;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentInfo;
@@ -17,6 +18,7 @@ import fr.yoga.booking.repository.ScheduledClassRepository;
 import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedException;
 import fr.yoga.booking.service.business.exception.reservation.BookingException;
 import fr.yoga.booking.service.business.exception.reservation.NotBookedException;
+import fr.yoga.booking.service.business.exception.reservation.RemindBookingException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -62,6 +64,18 @@ public class BookingService {
 				.stream()
 				.filter(c -> !c.isApproved())
 				.collect(toList());
+	}
+	
+	public void remindStudentsAboutNextClass(Reminder reminder) throws RemindBookingException {
+		ScheduledClass nextClass = scheduledClassRepository.findById(reminder.getScheduledClassId()).orElse(null);
+		if (nextClass == null) {
+			return;
+		}
+		List<StudentInfo> approvedStudents = listApprovedBookings(nextClass)
+				.stream()
+				.map(b -> b.getStudent())
+				.collect(toList());
+		notificationService.reminder(nextClass, approvedStudents);
 	}
 
 	

@@ -1,12 +1,13 @@
 package fr.yoga.booking.controller.dto;
 
-import java.net.URL;
+import java.util.List;
 
+import fr.yoga.booking.domain.reservation.Image;
 import lombok.Data;
 
 @Data
 public class NewPlace {
 	private String name;
 	private String address;
-	private URL plan;
+	private List<Image> maps;
 }

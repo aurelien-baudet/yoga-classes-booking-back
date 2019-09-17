@@ -27,13 +27,13 @@ public class PlaceController {
 	}
 
 	@GetMapping("{id}")
-	public Place getPlaceInfo(@PathVariable String placeId) throws PlaceException {
+	public Place getPlaceInfo(@PathVariable("id") String placeId) throws PlaceException {
 		return placeService.getPlace(placeId);
 	}
 
 	@PostMapping
 	public Place add(@RequestBody NewPlace place) throws PlaceException {
-		return placeService.register(place.getName(), place.getAddress(), place.getPlan());
+		return placeService.register(place.getName(), place.getAddress(), place.getMaps());
 	}
 
 }
