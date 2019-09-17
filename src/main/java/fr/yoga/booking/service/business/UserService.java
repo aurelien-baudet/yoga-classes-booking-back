@@ -89,6 +89,18 @@ public class UserService {
 		}
 		return new StudentInfo(student.getId(), "<anonyme>", student.getEmail(), student.getPhoneNumber());
 	}
+	
+	public boolean isLoginAvailable(String login) {
+		boolean existsAsStudent = studentRepository.existsByAccountLogin(login);
+		if(existsAsStudent) {
+			return false;
+		}
+		boolean existsAsTeacher = teacherRepository.existsByAccountLogin(login);
+		if(existsAsTeacher) {
+			return false;
+		}
+		return true;
+	}
 
 	private boolean exists(User user) {
 		boolean existsAsStudent = studentRepository.existsByAccountLogin(user.getAccount().getLogin());
