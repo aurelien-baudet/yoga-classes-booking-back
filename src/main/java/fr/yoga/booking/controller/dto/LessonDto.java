@@ -16,5 +16,6 @@ public class LessonDto {
 	private int maxStudents;
 	private List<Image> photos = new ArrayList<>();
 	private Place place;
+	private boolean placeChanged;
 	private Teacher teacher;
 }

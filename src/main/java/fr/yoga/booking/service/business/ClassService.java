@@ -70,9 +70,11 @@ public class ClassService {
 	}
 	
 	public ScheduledClass changePlace(ScheduledClass scheduledClass, Place newPlace) throws ScheduledClassException {
-		Place oldPlace = scheduledClass.getLesson().getPlace();
+		Lesson lesson = scheduledClass.getLesson();
+		Place oldPlace = lesson.getPlace();
 		// update class
-		scheduledClass.getLesson().setPlace(newPlace);
+		lesson.setPlace(newPlace);
+		lesson.setPlaceChanged(true);
 		ScheduledClass updated = scheduledClassRepository.save(scheduledClass);
 		// notify every participant
 		notificationService.placeChanged(updated, oldPlace, newPlace);
