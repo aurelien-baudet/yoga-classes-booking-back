@@ -18,6 +18,7 @@ import fr.yoga.booking.controller.dto.ScheduledClassDto;
 import fr.yoga.booking.controller.mapper.LessonMapper;
 import fr.yoga.booking.controller.mapper.ScheduledClassMapper;
 import fr.yoga.booking.domain.account.Teacher;
+import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.service.business.ClassService;
 import fr.yoga.booking.service.business.PlaceService;
@@ -67,4 +68,8 @@ public class LessonController {
 		return lessonMapper.toDto(classService.listUnscheduledLessons());
 	}
 
+	@PatchMapping("{lessonId}/info")
+	public LessonDto updateLessonInfo(@PathVariable("lessonId") String lessonId, @RequestBody LessonInfo newInfo) throws ScheduledClassException {
+		return lessonMapper.toDto(classService.updateLessonForAllClasses(classService.getLesson(lessonId), newInfo));
+	}
 }

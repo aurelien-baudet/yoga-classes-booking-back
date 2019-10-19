@@ -71,6 +71,15 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 	}
 
 	@Override
+	public List<ScheduledClass> findByLessonAndStartAfter(Lesson lesson, Optional<Instant> start) {
+		Criteria where = where("lesson._id").is(lesson.getId());
+		if(start.isPresent()) {
+			where = where.and("start").gte(start.get());
+		}
+		return mongo.find(query(where), ScheduledClass.class);
+	}
+
+	@Override
 	public List<ScheduledClass> findByLessonAndStartAfterAndEndBefore(Lesson lesson, Optional<Instant> start, Optional<Instant> end) {
 		Criteria where = where("lesson._id").is(lesson.getId());
 		if(start.isPresent()) {

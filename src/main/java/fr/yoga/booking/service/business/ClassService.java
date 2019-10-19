@@ -92,4 +92,21 @@ public class ClassService {
 	public List<Lesson> listUnscheduledLessons() {
 		return lessonRepository.findAllUnscheduled();
 	}
+
+	public ScheduledClass updateLessonInfoForSpecificClass(ScheduledClass scheduledClass, LessonInfo newInfo) {
+		scheduledClass.getLesson().setInfo(newInfo);
+		// TODO: if max participants has changed => update lists of participants
+		return scheduledClassRepository.save(scheduledClass);
+	}
+
+	public Lesson updateLessonForAllClasses(Lesson lesson, LessonInfo newInfo) {
+		lesson.setInfo(newInfo);
+		Lesson updated = lessonRepository.save(lesson);
+		List<ScheduledClass> classesForLesson = scheduledClassRepository.findByLessonAndStartAfter(updated, Optional.of(Instant.now()));
+		for(ScheduledClass classForLesson : classesForLesson) {
+			classForLesson.setLesson(updated);
+			scheduledClassRepository.save(classForLesson);
+		}
+		return updated;
+	}
 }

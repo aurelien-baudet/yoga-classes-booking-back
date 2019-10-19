@@ -19,5 +19,6 @@ public interface CustomizedScheduledClassRepository {
 	boolean existsBookedClassForStudent(ScheduledClass bookedClass, Student student);
 	boolean existsBookedClassForStudent(ScheduledClass bookedClass, UnregisteredUser student);
 
+	List<ScheduledClass> findByLessonAndStartAfter(Lesson lesson, Optional<Instant> start);
 	List<ScheduledClass> findByLessonAndStartAfterAndEndBefore(Lesson lesson, Optional<Instant> start, Optional<Instant> end);
 }

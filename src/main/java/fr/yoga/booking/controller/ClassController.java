@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.yoga.booking.controller.dto.ScheduledClassDto;
 import fr.yoga.booking.controller.mapper.ScheduledClassMapper;
 import fr.yoga.booking.domain.reservation.CancelData;
+import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.service.business.ClassService;
 import fr.yoga.booking.service.business.PlaceService;
 import fr.yoga.booking.service.business.UserService;
@@ -62,6 +63,11 @@ public class ClassController {
 												  @RequestParam(name="from", required=false) @DateTimeFormat(iso = ISO.DATE) LocalDate from, 
 												  @RequestParam(name="to", required=false)   @DateTimeFormat(iso = ISO.DATE) LocalDate to) throws ScheduledClassException {
 		return classMapper.toDto(classService.listClassesFor(classService.getLesson(lessonId), toInstant(from), toInstant(to)));
+	}
+
+	@PatchMapping("{classId}/lesson/info")
+	public ScheduledClassDto updateLessonInfo(@PathVariable("classId") String classId, @RequestBody LessonInfo newInfo) throws ScheduledClassException, PlaceException {
+		return classMapper.toDto(classService.updateLessonInfoForSpecificClass(classService.getClass(classId), newInfo));
 	}
 
 	private Instant toInstant(LocalDate date) {
