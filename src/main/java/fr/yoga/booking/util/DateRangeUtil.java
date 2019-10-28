@@ -1,4 +1,4 @@
-package fr.yoga.booking.service.technical.security;
+package fr.yoga.booking.util;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
 

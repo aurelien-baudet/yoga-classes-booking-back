@@ -1,6 +1,6 @@
 package fr.yoga.booking.service.business.exception.reservation;
 
-import static fr.yoga.booking.service.technical.security.DateRangeUtil.format;
+import static fr.yoga.booking.util.DateRangeUtil.format;
 
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.UnregisteredUser;

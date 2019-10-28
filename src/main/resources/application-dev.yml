@@ -1,6 +1,9 @@
 cors:
   allowed-origins: "*"
 
+reminder:
+  next-class: "4h"
+  
 #logging:
 #  level:
 #    org.springframework.data.mongodb.core.MongoTemplate: DEBUG

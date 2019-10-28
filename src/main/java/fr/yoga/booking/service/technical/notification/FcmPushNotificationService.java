@@ -12,9 +12,10 @@ import com.google.firebase.messaging.ApnsConfig;
 import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 
 import fr.yoga.booking.domain.account.User;
-import fr.yoga.booking.domain.notification.PushNotificationData;
+import fr.yoga.booking.domain.notification.PushNotification;
 import fr.yoga.booking.service.business.exception.NotificationException;
 import lombok.RequiredArgsConstructor;
 
@@ -23,12 +24,12 @@ import lombok.RequiredArgsConstructor;
 public class FcmPushNotificationService {
 	private final FirebaseMessaging fcm;
 	
-	public void sendPushNotification(User user, String token, PushNotificationData data) throws NotificationException {
+	public void sendPushNotification(User user, String token, PushNotification notification) throws NotificationException {
 	    try {
 		AndroidConfig androidConfig = AndroidConfig.builder()
 //	        .setTtl(Duration.ofMinutes(2).toMillis())
 //			.setCollapseKey("personal")
-	        .setPriority(Priority.HIGH)
+//	        .setPriority(Priority.HIGH)
 //	        .setNotification(AndroidNotification.builder().setTag("personal").build())
 	        .build();
 
@@ -37,11 +38,11 @@ public class FcmPushNotificationService {
 	        .build();
 
 	    Message msg = Message.builder()/*.putAllData(data)*/
-	    	.putAllData(new BeanUtilsBean2().describe(data))
+	    	.putAllData(new BeanUtilsBean2().describe(notification.getData()))
     		.setToken(token)
 	        .setApnsConfig(apnsConfig)
 	        .setAndroidConfig(androidConfig)
-//	        .setNotification(new Notification("Personal Message", message))
+//	        .setNotification(notification.getTitle() == null ? null : new Notification(notification.getTitle(), notification.getMessage()))
 	        .build();
 
 			String response = fcm.sendAsync(msg).get();

@@ -2,6 +2,10 @@ cors:
   allowed-methods: GET,POST,OPTIONS,PATCH,PUT,DELETE
   allowed-headers: Access-Control-Allow-Origin,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With
 
+reminder:
+  next-class: "1h"
+  
+  
 logging:
   level:
     org.reflections.Reflections: ERROR

@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.User;
-import fr.yoga.booking.domain.notification.BookedNotificationData;
-import fr.yoga.booking.domain.notification.ClassCanceledNotificationData;
-import fr.yoga.booking.domain.notification.FreePlaceBookedNotificationData;
-import fr.yoga.booking.domain.notification.PlaceChangedNotificationData;
-import fr.yoga.booking.domain.notification.PushNotificationData;
-import fr.yoga.booking.domain.notification.ReminderNotificationData;
-import fr.yoga.booking.domain.notification.UnbookedNotificationData;
+import fr.yoga.booking.domain.notification.BookedNotification;
+import fr.yoga.booking.domain.notification.ClassCanceledNotification;
+import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
+import fr.yoga.booking.domain.notification.PlaceChangedNotification;
+import fr.yoga.booking.domain.notification.PushNotification;
+import fr.yoga.booking.domain.notification.ReminderNotification;
+import fr.yoga.booking.domain.notification.UnbookedNotification;
 import fr.yoga.booking.domain.notification.UserPushToken;
 import fr.yoga.booking.domain.reservation.Booking;
 import fr.yoga.booking.domain.reservation.CancelData;
@@ -46,40 +46,40 @@ public class NotificationService {
 	public void classCanceled(ScheduledClass scheduledClass, CancelData additionalInfo) {
 		log.info("[{}] class canceled. Message: {}", scheduledClass.getId(), additionalInfo.getMessage());
 		for(StudentInfo student : scheduledClass.allStudents()) {
-			notify(student, new ClassCanceledNotificationData(scheduledClass, additionalInfo));
+			notify(student, new ClassCanceledNotification(scheduledClass, additionalInfo));
 		}
 	}
 
 	public void placeChanged(ScheduledClass scheduledClass, Place oldPlace, Place newPlace) {
 		log.info("[{}] place changed {} -> {}", scheduledClass.getId(), oldPlace.getName(), newPlace.getName());
 		for(StudentInfo student : scheduledClass.allStudents()) {
-			notify(student, new PlaceChangedNotificationData(scheduledClass, oldPlace, newPlace));
+			notify(student, new PlaceChangedNotification(scheduledClass, oldPlace, newPlace));
 		}
 	}
 
 	public void booked(ScheduledClass bookedClass, StudentInfo student, User bookedBy) {
 		log.info("[{}] booked for {}", bookedClass.getId(), student.getDisplayName());
-		notify(student, new BookedNotificationData(bookedClass, student));
+		notify(student, new BookedNotification(bookedClass, student));
 	}
 
 	public void unbooked(ScheduledClass bookedClass, StudentInfo student, User canceledBy) {
 		log.info("[{}] unbooked for {}", bookedClass.getId(), student.getDisplayName());
-		notify(student, new UnbookedNotificationData(bookedClass, student));
+		notify(student, new UnbookedNotification(bookedClass, student));
 	}
 
 	public void freePlaceBooked(ScheduledClass scheduledClass, Booking firstWaiting) {
 		log.info("[{}] place available => automatically booked for {}", scheduledClass.getId(), firstWaiting.getStudent().getDisplayName());
-		notify(firstWaiting.getStudent(), new FreePlaceBookedNotificationData(scheduledClass, firstWaiting.getStudent()));
+		notify(firstWaiting.getStudent(), new FreePlaceBookedNotification(scheduledClass, firstWaiting.getStudent()));
 	}
 
 	public void reminder(ScheduledClass nextClass, List<StudentInfo> approvedStudents) {
 		log.info("[{}] remind students about next class", nextClass.getId());
 		for(StudentInfo student : approvedStudents) {
-			notify(student, new ReminderNotificationData(nextClass));
+			notify(student, new ReminderNotification(nextClass));
 		}
 	}
 
-	private void notify(StudentInfo student, PushNotificationData data) {
+	private void notify(StudentInfo student, PushNotification data) {
 		try {
 			// TODO: handle user preferences
 			if(student.isRegistered()) {
@@ -93,7 +93,7 @@ public class NotificationService {
 		}
 	}
 
-	private void sendPushNotification(StudentInfo student, PushNotificationData data) throws NotificationException, UserException {
+	private void sendPushNotification(StudentInfo student, PushNotification data) throws NotificationException, UserException {
 		UserPushToken mapping = pushNotificationTokenRepository.findFirstByUserIdOrderByRegistrationDateDesc(student.getId());
 		if(mapping != null) {
 			fcmService.sendPushNotification(userService.getUser(student.getId()), mapping.getToken(), data);

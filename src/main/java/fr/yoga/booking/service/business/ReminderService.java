@@ -1,7 +1,6 @@
 package fr.yoga.booking.service.business;
 
 import static java.time.Instant.now;
-import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.util.stream.Collectors.toList;
 
@@ -24,11 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 public class ReminderService {
 	private final ReminderRepository reminderRepository;
 	private final BookingService bookingService;
+	private final ReminderProperties reminderProperties;
 
 	public void registerReminderForClass(ScheduledClass savedClass) {
-		reminderRepository.save(new Reminder(savedClass,
-//				savedClass.getStart().minus(1, HOURS), 
-				savedClass.getStart().minus(2, HOURS)));
+		reminderRepository.save(new Reminder(savedClass, reminderProperties.getNextClass()
+				.stream()
+				.map(time -> savedClass.getStart().minus(time))
+				.collect(toList())));
 	}
 
 	public void unregisterReminderForClass(ScheduledClass updated) {

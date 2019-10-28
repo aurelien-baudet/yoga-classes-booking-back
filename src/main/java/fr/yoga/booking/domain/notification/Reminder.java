@@ -23,6 +23,10 @@ public class Reminder {
 	private List<Instant> remindAt;
 	
 	public Reminder(ScheduledClass scheduledClass, Instant... remindAt) {
-		this(null, scheduledClass.getId(), Arrays.asList(remindAt));
+		this(scheduledClass, Arrays.asList(remindAt));
+	}
+	
+	public Reminder(ScheduledClass scheduledClass, List<Instant> remindAt) {
+		this(null, scheduledClass.getId(), remindAt);
 	}
 }
