@@ -1,0 +1,15 @@
+language: java
+jdk: oraclejdk11
+
+script:
+- ./mvnw package
+
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_API_TOKEN
+  file: target/yoga-booking-0.0.1-SNAPSHOT.jar
+  skip_cleanup: true
+  draft: true
+  on:
+    repo: aurelien-baudet/yoga-classes-booking-back
