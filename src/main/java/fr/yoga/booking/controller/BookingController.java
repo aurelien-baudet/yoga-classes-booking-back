@@ -41,7 +41,7 @@ public class BookingController {
 	
 	@PostMapping("{classId}/bookings/{studentId}")
 	public ScheduledClassDto book(@PathVariable("classId") String classId, @PathVariable("studentId") String studentId, @AuthenticationPrincipal UserDetailsWrapper currentUser) throws UserException, ScheduledClassException, BookingException {
-		User bookedBy = userService.getUser(currentUser != null ? currentUser.getUser().getId() : studentId);
+		User bookedBy = userService.getUserInfo(currentUser != null ? currentUser.getUser().getId() : studentId);
 		Student student = userService.getStudent(studentId);
 		ScheduledClass bookedClass = classService.getClass(classId);
 		return classMapper.toDto(bookingService.book(bookedClass, student, bookedBy));
@@ -57,7 +57,7 @@ public class BookingController {
 	
 	@DeleteMapping("{classId}/bookings/{studentId}")
 	public ScheduledClassDto unbook(@PathVariable("classId") String classId, @PathVariable("studentId") String studentId, @AuthenticationPrincipal UserDetailsWrapper currentUser) throws UserException, ScheduledClassException, BookingException {
-		User canceledBy = userService.getUser(currentUser != null ? currentUser.getUser().getId() : studentId);
+		User canceledBy = userService.getUserInfo(currentUser != null ? currentUser.getUser().getId() : studentId);
 		Student student = userService.getStudent(studentId);
 		ScheduledClass bookedClass = classService.getClass(classId);
 		return classMapper.toDto(bookingService.unbook(bookedClass, student, canceledBy));

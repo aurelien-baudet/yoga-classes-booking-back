@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import fr.yoga.booking.controller.dto.ErrorDto;
 import fr.yoga.booking.service.business.exception.AlreadyRegisteredUser;
+import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedException;
+import fr.yoga.booking.service.business.exception.reservation.NotBookedException;
 import fr.yoga.booking.service.business.exception.user.StudentNotFoundException;
 
 @RestControllerAdvice
@@ -23,5 +25,21 @@ public class BusinessErrorExceptionTranslator {
 	public ErrorDto alreadyRegisteredUser(AlreadyRegisteredUser e) {
 		return new ErrorDto("LOGIN_ALREADY_USED", e)
 				.addData("login", e.getUser().getAccount().getLogin());
+	}
+	
+	@ExceptionHandler(AlreadyBookedException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorDto alreadyBookedException(AlreadyBookedException e) {
+		return new ErrorDto("ALREADY_BOOKED", e)
+				.addData("bookedClassId", e.getBookedClass().getId())
+				.addData("studentId", e.getStudent().getId());
+	}
+	
+	@ExceptionHandler(NotBookedException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorDto notBookedException(NotBookedException e) {
+		return new ErrorDto("NOT_BOOKED", e)
+				.addData("classId", e.getBookedClass().getId())
+				.addData("studentId", e.getStudent().getId());
 	}
 }

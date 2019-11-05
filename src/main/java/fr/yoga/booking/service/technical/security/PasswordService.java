@@ -1,4 +1,4 @@
-package fr.yoga.booking.service.business.security;
+package fr.yoga.booking.service.technical.security;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class SecurityService {
+public class PasswordService {
 	private final PasswordEncoder passwordEncoder;
 	
 	public String encodePassword(String password) {

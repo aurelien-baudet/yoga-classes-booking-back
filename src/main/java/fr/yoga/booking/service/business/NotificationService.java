@@ -21,6 +21,8 @@ import fr.yoga.booking.domain.reservation.StudentInfo;
 import fr.yoga.booking.repository.PushNotificationTokenRepository;
 import fr.yoga.booking.service.business.exception.NotificationException;
 import fr.yoga.booking.service.business.exception.user.UserException;
+import fr.yoga.booking.service.business.security.annotation.CanRegisterNotificationToken;
+import fr.yoga.booking.service.business.security.annotation.CanUnregisterNotificationToken;
 import fr.yoga.booking.service.technical.notification.FcmPushNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +35,14 @@ public class NotificationService {
 	private final UserService userService;
 	private final FcmPushNotificationService fcmService;
 	
+	@CanRegisterNotificationToken
 	public void registerNotificationTokenForUser(User user, String token) {
 		if(!pushNotificationTokenRepository.existsByUserIdAndToken(user.getId(), token)) {
 			pushNotificationTokenRepository.save(new UserPushToken(user, token));
 		}
 	}
 
+	@CanUnregisterNotificationToken
 	public void unregisterNotificationTokenForUser(User user) {
 		pushNotificationTokenRepository.deleteByUserId(user.getId());
 	}

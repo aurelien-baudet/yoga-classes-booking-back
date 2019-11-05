@@ -31,7 +31,7 @@ public class UserController {
 		if(wrapper == null) {
 			return null;
 		}
-		return userService.getUser(wrapper.getUser().getId());
+		return userService.getUserInfo(wrapper.getUser().getId());
 	}
 
 	@GetMapping(path="login", params="available")
@@ -41,7 +41,7 @@ public class UserController {
 
 	@GetMapping("{userId}")
 	public User getUserInfo(@PathVariable String userId) throws UserException {
-		return userService.getUser(userId);
+		return userService.getUserInfo(userId);
 	}
 
 	@PostMapping("students")

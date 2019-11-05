@@ -22,6 +22,10 @@ public abstract class User {
 	}
 
 	public boolean isSame(User other) {
-		return other != null && id.equals(other.getId());
+		return other != null && isSame(other.getId());
+	}
+	
+	public boolean isSame(String otherId) {
+		return otherId != null && id.equals(otherId);
 	}
 }

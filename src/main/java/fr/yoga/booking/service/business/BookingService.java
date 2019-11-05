@@ -19,6 +19,11 @@ import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedExcep
 import fr.yoga.booking.service.business.exception.reservation.BookingException;
 import fr.yoga.booking.service.business.exception.reservation.NotBookedException;
 import fr.yoga.booking.service.business.exception.reservation.RemindBookingException;
+import fr.yoga.booking.service.business.security.annotation.CanBookClass;
+import fr.yoga.booking.service.business.security.annotation.CanListApprovedBookings;
+import fr.yoga.booking.service.business.security.annotation.CanListBookedClasses;
+import fr.yoga.booking.service.business.security.annotation.CanListWaitingBookings;
+import fr.yoga.booking.service.business.security.annotation.CanUnbookClass;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,30 +33,37 @@ public class BookingService {
 	private final NotificationService notificationService;
 	private final WaitingListStrategy waitingListStrategy;
 	
+	@CanBookClass
 	public ScheduledClass book(ScheduledClass bookedClass, Student student, User bookedBy) throws BookingException {
 		return book(bookedClass, new StudentInfo(student), bookedBy);
 	}
 	
+	@CanBookClass
 	public ScheduledClass book(ScheduledClass bookedClass, UnregisteredUser student, User bookedBy) throws BookingException {
 		return book(bookedClass, new StudentInfo(student), bookedBy);
 	}
 
+	@CanUnbookClass
 	public ScheduledClass unbook(ScheduledClass bookedClass, Student student, User canceledBy) throws BookingException {
 		return unbook(bookedClass, new StudentInfo(student), canceledBy);
 	}
 
+	@CanUnbookClass
 	public ScheduledClass unbook(ScheduledClass bookedClass, UnregisteredUser student, User canceledBy) throws BookingException {
 		return unbook(bookedClass, new StudentInfo(student), canceledBy);
 	}
 	
+	@CanListBookedClasses
 	public List<ScheduledClass> listBookedClassesBy(Student student) {
 		return scheduledClassRepository.findNextBookedClassesForStudent(student);
 	}
 	
+	@CanListBookedClasses
 	public List<ScheduledClass> listBookedClassesBy(UnregisteredUser student) {
 		return scheduledClassRepository.findNextBookedClassesForStudent(student);
 	}
 	
+	@CanListApprovedBookings
 	public List<Booking> listApprovedBookings(ScheduledClass scheduledClass) {
 		return scheduledClass.sortedByAscendingDateBookings()
 				.stream()
@@ -59,6 +71,7 @@ public class BookingService {
 				.collect(toList());
 	}
 
+	@CanListWaitingBookings
 	public List<Booking> listWaitingBookings(ScheduledClass scheduledClass) {
 		return scheduledClass.sortedByAscendingDateBookings()
 				.stream()

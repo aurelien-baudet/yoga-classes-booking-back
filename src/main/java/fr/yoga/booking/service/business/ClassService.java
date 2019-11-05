@@ -22,6 +22,17 @@ import fr.yoga.booking.repository.ScheduledClassRepository;
 import fr.yoga.booking.service.business.exception.LessonNotFoundException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassNotFoundException;
+import fr.yoga.booking.service.business.security.annotation.CanCancelClass;
+import fr.yoga.booking.service.business.security.annotation.CanChangePlace;
+import fr.yoga.booking.service.business.security.annotation.CanListClassesForLesson;
+import fr.yoga.booking.service.business.security.annotation.CanListFutureClasses;
+import fr.yoga.booking.service.business.security.annotation.CanListLessons;
+import fr.yoga.booking.service.business.security.annotation.CanListUnscheduledLessons;
+import fr.yoga.booking.service.business.security.annotation.CanRegisterLesson;
+import fr.yoga.booking.service.business.security.annotation.CanScheduleClass;
+import fr.yoga.booking.service.business.security.annotation.CanUpdateLessonInfo;
+import fr.yoga.booking.service.business.security.annotation.CanViewClassInfo;
+import fr.yoga.booking.service.business.security.annotation.CanViewLessonInfo;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,11 +43,13 @@ public class ClassService {
 	private final NotificationService notificationService;
 	private final ReminderService reminderService;
 
+	@CanRegisterLesson
 	public Lesson register(LessonInfo data, Place place, Teacher teacher) throws ScheduledClassException {
 		Lesson lesson = new Lesson(data, place, teacher);
 		return lessonRepository.save(lesson);
 	}
 	
+	@CanScheduleClass
 	public ScheduledClass schedule(Lesson lesson, Instant start, Instant end) throws ScheduledClassException {
 		ScheduledClass scheduledClass = new ScheduledClass(start, end, lesson);
 		ScheduledClass savedClass = scheduledClassRepository.save(scheduledClass);
@@ -44,6 +57,7 @@ public class ClassService {
 		return savedClass;
 	}
 	
+	@CanCancelClass
 	public ScheduledClass cancel(ScheduledClass scheduledClass, CancelData addtionalInfo) throws ScheduledClassException {
 		// update class
 		scheduledClass.setState(new Canceled(addtionalInfo.getMessage()));
@@ -54,21 +68,25 @@ public class ClassService {
 		return updated;
 	}
 	
+	@CanViewLessonInfo
 	public Lesson getLesson(String lessonId) throws ScheduledClassException {
 		return lessonRepository.findById(lessonId)
 				.orElseThrow(() -> new LessonNotFoundException(lessonId));
 	}
 	
+	@CanViewClassInfo
 	public ScheduledClass getClass(String classId) throws ScheduledClassException {
 		return scheduledClassRepository.findById(classId)
 				.orElseThrow(() -> new ScheduledClassNotFoundException(classId));
 	}
 	
+	@CanListFutureClasses
 	public List<ScheduledClass> listFutureClasses() {
 		Instant today = Instant.now().truncatedTo(DAYS);
 		return scheduledClassRepository.findByStartAfter(today, Sort.by(asc("start")));
 	}
 	
+	@CanChangePlace
 	public ScheduledClass changePlace(ScheduledClass scheduledClass, Place newPlace) throws ScheduledClassException {
 		Lesson lesson = scheduledClass.getLesson();
 		Place oldPlace = lesson.getPlace();
@@ -81,24 +99,29 @@ public class ClassService {
 		return updated;
 	}
 
+	@CanListClassesForLesson
 	public List<ScheduledClass> listClassesFor(Lesson lesson, Instant from, Instant to) {
 		return scheduledClassRepository.findByLessonAndStartAfterAndEndBefore(lesson, Optional.ofNullable(from), Optional.ofNullable(to));
 	}
 
+	@CanListLessons
 	public List<Lesson> listLessons() {
 		return lessonRepository.findAll();
 	}
 
+	@CanListUnscheduledLessons
 	public List<Lesson> listUnscheduledLessons() {
 		return lessonRepository.findAllUnscheduled();
 	}
 
+	@CanUpdateLessonInfo
 	public ScheduledClass updateLessonInfoForSpecificClass(ScheduledClass scheduledClass, LessonInfo newInfo) {
 		scheduledClass.getLesson().setInfo(newInfo);
 		// TODO: if max participants has changed => update lists of participants
 		return scheduledClassRepository.save(scheduledClass);
 	}
 
+	@CanUpdateLessonInfo
 	public Lesson updateLessonForAllClasses(Lesson lesson, LessonInfo newInfo) {
 		lesson.setInfo(newInfo);
 		Lesson updated = lessonRepository.save(lesson);

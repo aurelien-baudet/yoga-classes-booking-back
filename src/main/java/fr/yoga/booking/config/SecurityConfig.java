@@ -21,6 +21,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import fr.yoga.booking.service.technical.security.AnonymousUserDetails;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -44,10 +46,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //				.successHandler(new HttpStatusSuccessHandler(ACCEPTED))
 //				.failureHandler(new HttpStatusFailureHandler(UNAUTHORIZED))
 //				.and()
-//				// TODO: enable csrf
+			// TODO: enable csrf
+			// TODO: UnregisteredUser should be known in Spring Security in order to test security access ?	
 			.csrf().disable()
 			.cors().and()
 			.httpBasic().and()
+			.anonymous()
+				.principal(new AnonymousUserDetails()).and()
 			.authorizeRequests()
 				.antMatchers(GET, "/users").permitAll()
 				.antMatchers(GET, "/users/*").permitAll()
