@@ -75,4 +75,11 @@ public class ScheduledClass {
 				.map(b -> b.getStudent())
 				.collect(toList());
 	}
+	
+	public boolean isApprovedFor(StudentInfo student) {
+		return getBookings()
+				.stream()
+				.filter(b -> b.isForStudent(student))
+				.anyMatch(b -> b.isApproved());
+	}
 }

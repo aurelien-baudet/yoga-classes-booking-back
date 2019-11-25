@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
 import java.io.IOException;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +19,7 @@ import fr.yoga.booking.service.technical.notification.FcmProperties;
 public class FcmConfig {
 
 	@Bean
+	@ConditionalOnMissingBean(FirebaseMessaging.class)
 	public FirebaseMessaging fcm(FcmProperties props) throws IOException {
 		FirebaseOptions options = new FirebaseOptions.Builder()
 				.setCredentials(fromStream(props.getServiceAccountFile().getInputStream())).build();

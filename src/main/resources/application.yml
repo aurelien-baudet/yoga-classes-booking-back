@@ -4,7 +4,17 @@ cors:
 
 reminder:
   next-class: "1h"
-  
+
+ogham:
+  email:
+    template:
+      classpath:
+        path-prefix: /templates/email/
+  sms:
+    template:
+      classpath:
+        path-prefix: /templates/sms/
+        path-suffix: .txt.ftl
   
 logging:
   level:
@@ -20,3 +30,10 @@ spring:
       write-durations-as-timestamps: true
       write-dates-as-timestamps: true
       write-date-timestamps-as-nanoseconds: false
+  thymeleaf:
+    prefix: ""
+    suffix: ""
+  freemarker:
+    prefix: ""
+    suffix: ""
+    

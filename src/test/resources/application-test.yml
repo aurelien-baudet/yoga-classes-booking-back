@@ -1,22 +1,12 @@
-cors:
-  allowed-origins: "*"
-
 reminder:
   next-class: "4h"
-
-mail:
-  smtp:
-    auth: true
-    starttls:
-      enable: true
-    host: smtp.gmail.com
-    port: 465
 deployment:
-  web-app-base-url: http://localhost:8100
+  web-app-base-url: https://yoga.abaudet.ovh
 
 #logging:
 #  level:
-#    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+##    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+#    fr.sii.ogham: TRACE
 
 #spring:
 #  security:

@@ -1,7 +1,10 @@
 package fr.yoga.booking.domain.notification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentInfo;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,9 +27,12 @@ public class BookedNotification implements PushNotification {
 		return new BookedNotificationData(bookedClass, bookedFor);
 	}
 	
+	@Getter
 	@RequiredArgsConstructor
 	public static class BookedNotificationData implements PushNotificationData {
+		@JsonIgnore
 		private final ScheduledClass bookedClass;
+		@JsonIgnore
 		private final StudentInfo bookedFor;
 		
 		@Override
@@ -47,10 +53,7 @@ public class BookedNotification implements PushNotification {
 		}
 		
 		public boolean isApproved() {
-			return bookedClass.getBookings()
-					.stream()
-					.filter(b -> b.isForStudent(bookedFor))
-					.anyMatch(b -> b.isApproved());
+			return bookedClass.isApprovedFor(bookedFor);
 		}
 	}
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<p class="approved-message" th:fragment="approvedMessage">
+		Vous avez réservé un cours de yoga avec moi et je vous en remercie.<br />
+		Prévoyez de venir 15min en avance pour vous installer calmement.<br />
+		<br />
+		Je limite les places afin d'être au maximum avec vous, pour vous accompagner et vous emmener toujours un peu plus loin.<br />
+		Essayez de venir le ventre léger pour ne pas bloquer la respiration.<br />
+		<br />
+		Si vous ne vous sentez pas en grande forme avant le cours, venez ;)<br />
+		C'est là que le yoga prend tout son sens.<br />
+		Vous vous sentirez probablement mieux que si vous n'étiez pas venu.<br />
+		<br />
+		Si jamais vous avez un empêchement, pensez à annuler la reservation afin que quelqu'un puisse prendre votre place.<br />
+		Plus vous prévenez tôt, mieux c'est pour les autres :)<br />
+		<br />
+		La participation est libre, cependant on peut convenir d'un forfait mensuel ensemble afin que vous puissiez venir en illimité sur un mois.<br />
+		<br />
+		A bientôt sur le tapis, Namaste!
+	</p>
+	
+	<p class="waiting-message" th:fragment="waitingMessage">
+		Vous avez réservé un cours de yoga avec moi et je vous en remercie.<br />
+		Le cours étant complet, vous êtes inscrit sur la file d'attente.<br />
+		<br />
+		Dès qu'une place se libère, vous recevez un mail pour vous indiquer que vous êtes automatiquement inscrit.<br />
+		<br />
+		A bientôt sur le tapis, Namaste!
+	</p>
+	
+	<div class="details" th:fragment="description(scheduledClass)">
+		<h2>
+			Informations concernant le cours réservé
+		</h2>
+		<p th:utext="${#strings.replace( #strings.escapeXml( scheduledClass.lesson.info.description ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}">
+			Ce cours est destiné à ceux qui veulent éliminer les toxines accumulées
+			pendant le weekend, à ceux qui veulent s’assouplir et développer
+			leurs muscles profonds à travers une pratique dynamique.<br />
+			Le lundi c'est un cours orienté fluidité.<br />
+			<br />
+			Dans ce cours, on reprendra les	postures de base du yoga, on travaillera sur tout le corps de manière
+			équilibrée dans une séquence adaptée au niveau de chacun.<br />
+			<br />
+			Des tapis seront mis à disposition.<br />
+			Participation libre.<br />
+			Place limitées, me	contactez en MP.
+		</p>
+	</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout.html :: header(~{::title}, ~{::link})">
+	<title th:if="${data.isApproved()}">
+		Cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(data.bookedClass.start, data.bookedClass.end)}]] réservé</title>
+	<title th:unless="${data.isApproved()}">
+		Vous êtes inscrit sur file d'attente au cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(data.bookedClass.start, data.bookedClass.end)}]]</title>
+	<link th:href="@{css/booked.css}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<h1>Je vous remercie de votre inscription</h1>
+	<p th:replace="${data.isApproved()} ? 
+			~{} :
+			~{fragments/information.html :: waitingMessage}"></p>
+	<div th:replace="fragments/class.html :: bookedClassPreview(${data.bookedClass}, ${data.bookedFor}, ${data.bookedClass.lesson.place}, ~{::.actions})">
+		<!-- TODO: list of added participants (handle register friends case) ? -->
+		<div class="actions">
+			<a class="button open" th:href="${@deploymentContextService.viewClassUrl(data.bookedClass)}">Voir les informations du cours</a>
+			<a class="button unbook" th:href="${@deploymentContextService.unbookUrl(data.bookedClass)}">Vous désinscrire</a>
+		</div>
+	</div>
+	<div class="message" th:if="${data.isApproved()}">
+		<h2>
+			Quelques informations supplémentaires
+		</h2>
+		<p th:replace="fragments/information.html :: approvedMessage"></p>
+	</div>
+	<div th:replace="fragments/information.html :: description(${data.bookedClass})"></div>
+	<footer th:replace="fragments/layout.html :: footer"></footer>
+</body>
+</html>

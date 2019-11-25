@@ -2,6 +2,7 @@ package fr.yoga.booking.domain.notification;
 
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentInfo;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class FreePlaceBookedNotification implements PushNotification {
 		return new FreePlaceBookedNotificationData(bookedClass, student);
 	}
 
+	@Getter
 	@RequiredArgsConstructor
 	public static class FreePlaceBookedNotificationData implements PushNotificationData {
 		private final ScheduledClass bookedClass;

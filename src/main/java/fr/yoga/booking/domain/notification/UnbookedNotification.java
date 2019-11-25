@@ -2,6 +2,7 @@ package fr.yoga.booking.domain.notification;
 
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentInfo;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class UnbookedNotification implements PushNotification {
 	}
 	
 
+	@Getter
 	@RequiredArgsConstructor
 	public class UnbookedNotificationData implements PushNotificationData {
 		private final ScheduledClass bookedClass;
@@ -49,10 +51,7 @@ public class UnbookedNotification implements PushNotification {
 		}
 		
 		public boolean isApproved() {
-			return bookedClass.getBookings()
-					.stream()
-					.filter(b -> b.isForStudent(bookedFor))
-					.anyMatch(b -> b.isApproved());
+			return bookedClass.isApprovedFor(bookedFor);
 		}
 	}
 

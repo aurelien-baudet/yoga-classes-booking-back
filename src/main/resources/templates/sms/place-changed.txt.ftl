@@ -1,0 +1,1 @@
+Bonjour, le cours du ${statics['fr.yoga.booking.util.DateRangeUtil'].format(data.scheduledClass.start, data.scheduledClass.end)} sera dispensé à ${data.newPlace.name}

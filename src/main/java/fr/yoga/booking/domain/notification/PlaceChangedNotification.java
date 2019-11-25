@@ -3,6 +3,7 @@ package fr.yoga.booking.domain.notification;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.util.DateRangeUtil;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class PlaceChangedNotification implements PushNotification {
 		return new PlaceChangedNotificationData(scheduledClass, oldPlace, newPlace);
 	}
 
+	@Getter
 	@RequiredArgsConstructor
 	public class PlaceChangedNotificationData implements PushNotificationData {
 		private final ScheduledClass scheduledClass;

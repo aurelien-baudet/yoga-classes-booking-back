@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout.html :: header(~{::title}, ~{::link})">
+	<title>Changement de lieu pour le cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(data.scheduledClass.start, data.scheduledClass.end)}]]</title>
+	<link th:href="@{css/place-changed.css}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<h1>Changement de lieu</h1>
+	<p class="place-changed-message">
+		Le cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(data.scheduledClass.start, data.scheduledClass.end)}]] sera dispensé à <span class="new-place">[[${data.newPlace.name}]]</span>
+		au lieu de <span class="old-place">[[${data.oldPlace.name}]]</span>
+	</p>
+	<div th:replace="fragments/class.html :: classPreview(${data.scheduledClass}, ${data.newPlace}, ~{})"></div>
+	<footer th:replace="fragments/layout.html :: footer"></footer>
+</body>
+</html>

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import fr.sii.ogham.core.exception.MessagingException;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
@@ -20,6 +21,7 @@ import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentInfo;
 import fr.yoga.booking.repository.PushNotificationTokenRepository;
 import fr.yoga.booking.service.business.exception.NotificationException;
+import fr.yoga.booking.service.business.exception.UnreachableUserException;
 import fr.yoga.booking.service.business.exception.user.UserException;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterNotificationToken;
 import fr.yoga.booking.service.business.security.annotation.CanUnregisterNotificationToken;
@@ -34,6 +36,7 @@ public class NotificationService {
 	private final PushNotificationTokenRepository pushNotificationTokenRepository;
 	private final UserService userService;
 	private final FcmPushNotificationService fcmService;
+	private final ContactService contactService;
 	
 	@CanRegisterNotificationToken
 	public void registerNotificationTokenForUser(User user, String token) {
@@ -79,22 +82,38 @@ public class NotificationService {
 	public void reminder(ScheduledClass nextClass, List<StudentInfo> approvedStudents) {
 		log.info("[{}] remind students about next class", nextClass.getId());
 		for(StudentInfo student : approvedStudents) {
-			notify(student, new ReminderNotification(nextClass));
+			notify(student, new ReminderNotification(nextClass, student));
 		}
 	}
 
-	private void notify(StudentInfo student, PushNotification data) {
+	private void notify(StudentInfo student, PushNotification notification) {
 		try {
-			// TODO: handle user preferences
-			if(student.isRegistered()) {
-				sendPushNotification(student, data);
-			} else {
-				// TODO: send email or SMS for unregistered user
+			if(canReceivePushNotification(student)) {
+				sendPushNotification(student, notification);
+			}
+			if(!canReceivePushNotification(student) || shouldAlsoReceiveUsingOtherMeansOfCommunication(student, notification)) {
+				contactService.sendMessage(student, notification);
 			}
 		} catch(NotificationException | UserException e) {
 			log.error("Failed to send push notification to "+student.getDisplayName(), e);
 			// TODO: handle correctly errors
+		} catch (MessagingException e) {
+			log.error("Failed to send email/sms to "+student.getDisplayName(), e);
+			// TODO: handle correctly errors
+		} catch (UnreachableUserException e) {
+			log.error("User is unreachable (neither phone number nor email provided) "+student.getDisplayName(), e);
+			// TODO: handle correctly errors
 		}
+	}
+
+	private boolean canReceivePushNotification(StudentInfo student) {
+		return student.isRegistered() && pushNotificationTokenRepository.existsByUserId(student.getId());
+	}
+
+	private boolean shouldAlsoReceiveUsingOtherMeansOfCommunication(StudentInfo student, PushNotification notification) {
+		// TODO: should duplicate information for particular notification (like place change or class canceled for example) ?
+		// TODO: unregistered user has option to automatically receive email for booked classes (aim is to receive ics)
+		return false;
 	}
 
 	private void sendPushNotification(StudentInfo student, PushNotification data) throws NotificationException, UserException {
@@ -103,4 +122,5 @@ public class NotificationService {
 			fcmService.sendPushNotification(userService.getUser(student.getId()), mapping.getToken(), data);
 		}
 	}
+
 }

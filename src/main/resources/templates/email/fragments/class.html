@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="preview" th:fragment="classPreview(scheduledClass, place, actions)">
+		<h2>
+			<a th:href="${@deploymentContextService.viewClassUrl(scheduledClass)}">[[${scheduledClass.lesson.info.title}]]</a>
+		</h2>
+		<div class="date">
+			<span class="icon"><img src="images/calendar-check.png" /></span>
+			<span class="text">[[${#strings.capitalize(T(fr.yoga.booking.util.DateRangeUtil).format(scheduledClass.start, scheduledClass.end))}]]</span>
+		</div>
+		<div class="place" th:if="${place != null}">
+			<span class="icon"><img src="images/place-address.png" /></span>
+			<span class="text">[[${place.name}]] - [[${place.address}]]</span>
+		</div>
+		<th:block th:replace="${actions}" />
+	</div>
+	
+	<div class="preview" th:fragment="bookedClassPreview(scheduledClass, bookedFor, place, actions)">
+		<div th:include="::classPreview(${scheduledClass}, ${place}, ~{})"></div>
+		<div class="booked-for">
+			<span class="icon"><img src="images/user.png" /></span>
+			<span class="text">[[${bookedFor.displayName}]]</span>
+		</div>
+		<th:block th:replace="${actions}" />
+	</div>
+</body>
+</html>

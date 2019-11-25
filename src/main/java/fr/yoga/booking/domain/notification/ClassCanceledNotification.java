@@ -2,6 +2,7 @@ package fr.yoga.booking.domain.notification;
 
 import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class ClassCanceledNotification implements PushNotification {
 		return new ClassCanceledNotificationData(canceledClass, additionalInfo);
 	}
 	
+	@Getter
 	@RequiredArgsConstructor
 	public static class ClassCanceledNotificationData implements PushNotificationData {
 		private final ScheduledClass canceledClass;
