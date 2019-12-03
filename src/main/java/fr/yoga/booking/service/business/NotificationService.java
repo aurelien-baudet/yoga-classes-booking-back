@@ -95,13 +95,13 @@ public class NotificationService {
 				contactService.sendMessage(student, notification);
 			}
 		} catch(NotificationException | UserException e) {
-			log.error("Failed to send push notification to "+student.getDisplayName(), e);
+			log.error("Failed to send push notification to {}", student.getDisplayName(), e);
 			// TODO: handle correctly errors
 		} catch (MessagingException e) {
-			log.error("Failed to send email/sms to "+student.getDisplayName(), e);
+			log.error("Failed to send email/sms to {}", student.getDisplayName(), e);
 			// TODO: handle correctly errors
 		} catch (UnreachableUserException e) {
-			log.error("User is unreachable (neither phone number nor email provided) "+student.getDisplayName(), e);
+			log.error("User {} is unreachable (neither phone number nor email provided)", student.getDisplayName(), e);
 			// TODO: handle correctly errors
 		}
 	}
