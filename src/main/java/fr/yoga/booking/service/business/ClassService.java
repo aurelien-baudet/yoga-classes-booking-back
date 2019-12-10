@@ -24,6 +24,7 @@ import fr.yoga.booking.service.business.exception.reservation.ScheduledClassExce
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassNotFoundException;
 import fr.yoga.booking.service.business.security.annotation.CanCancelClass;
 import fr.yoga.booking.service.business.security.annotation.CanChangePlace;
+import fr.yoga.booking.service.business.security.annotation.CanChangeAllPlaces;
 import fr.yoga.booking.service.business.security.annotation.CanListClassesForLesson;
 import fr.yoga.booking.service.business.security.annotation.CanListFutureClasses;
 import fr.yoga.booking.service.business.security.annotation.CanListLessons;
@@ -122,13 +123,25 @@ public class ClassService {
 	}
 
 	@CanUpdateLessonInfo
-	public Lesson updateLessonForAllClasses(Lesson lesson, LessonInfo newInfo) {
+	public Lesson updateLessonForAllClasses(Lesson lesson, LessonInfo newInfo) throws ScheduledClassException {
 		lesson.setInfo(newInfo);
 		Lesson updated = lessonRepository.save(lesson);
 		List<ScheduledClass> classesForLesson = scheduledClassRepository.findByLessonAndStartAfter(updated, Optional.of(Instant.now()));
 		for(ScheduledClass classForLesson : classesForLesson) {
 			classForLesson.setLesson(updated);
 			scheduledClassRepository.save(classForLesson);
+		}
+		return updated;
+	}
+
+	@CanChangeAllPlaces
+	public Lesson updatePlaceForAllClasses(Lesson lesson, Place newPlace) throws ScheduledClassException {
+		lesson.setPlace(newPlace);
+		lesson.setPlaceChanged(true);
+		Lesson updated = lessonRepository.save(lesson);
+		List<ScheduledClass> classesForLesson = scheduledClassRepository.findByLessonAndStartAfter(updated, Optional.of(Instant.now()));
+		for(ScheduledClass classForLesson : classesForLesson) {
+			changePlace(classForLesson, newPlace);
 		}
 		return updated;
 	}

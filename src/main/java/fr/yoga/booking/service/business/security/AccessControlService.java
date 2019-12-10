@@ -13,6 +13,7 @@ import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.reservation.Lesson;
+import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import lombok.RequiredArgsConstructor;
 
@@ -108,6 +109,10 @@ public class AccessControlService {
 		return true;
 	}
 	
+	public boolean canViewPlace(User currentUser, String placeId) {
+		return true;
+	}
+	
 	public boolean canChangePlace(User currentUser, ScheduledClass scheduledClass) {
 		if(hasAnyRole(currentUser, GOD, TEACHER)) {
 			return true;
@@ -115,6 +120,23 @@ public class AccessControlService {
 		// TODO: is any teacher can change place for a class of another teacher ?
 		return false;
 	}
+	
+	public boolean canChangeAllPlaces(User currentUser, Lesson lesson) {
+		if(hasAnyRole(currentUser, GOD, TEACHER)) {
+			return true;
+		}
+		// TODO: is any teacher can change place for a class of another teacher ?
+		return false;
+	}
+	
+	public boolean canUpdatePlace(User currentUser, Place place) {
+		if(hasAnyRole(currentUser, GOD, TEACHER)) {
+			return true;
+		}
+		// TODO: is any teacher can update place information ?
+		return false;
+	}
+	
 	
 	public boolean canScheduleClass(User currentUser, Lesson lesson) {
 		if(hasAnyRole(currentUser, GOD, TEACHER)) {

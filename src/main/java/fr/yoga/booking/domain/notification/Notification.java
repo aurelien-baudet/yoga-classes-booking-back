@@ -1,5 +1,5 @@
 package fr.yoga.booking.domain.notification;
 
-public interface PushNotificationData {
+public interface Notification {
 	NotificationType getType();
 }

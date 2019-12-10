@@ -68,6 +68,12 @@ public class LessonController {
 		return lessonMapper.toDto(classService.listUnscheduledLessons());
 	}
 
+	@PatchMapping("{lessonId}/places/{newPlaceId}")
+	public LessonDto updatePlace(@PathVariable("lessonId") String lessonId, @PathVariable("newPlaceId") String newPlaceId) throws ScheduledClassException, PlaceException {
+		Place newPlace = placeService.getPlace(newPlaceId);
+		return lessonMapper.toDto(classService.updatePlaceForAllClasses(classService.getLesson(lessonId), newPlace));
+	}
+
 	@PatchMapping("{lessonId}/info")
 	public LessonDto updateLessonInfo(@PathVariable("lessonId") String lessonId, @RequestBody LessonInfo newInfo) throws ScheduledClassException {
 		return lessonMapper.toDto(classService.updateLessonForAllClasses(classService.getLesson(lessonId), newInfo));

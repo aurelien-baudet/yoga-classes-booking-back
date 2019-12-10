@@ -5,54 +5,14 @@ import fr.yoga.booking.domain.reservation.StudentInfo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
-public class UnbookedNotification implements PushNotification {
+public class UnbookedNotification implements Notification {
 	private final ScheduledClass bookedClass;
 	private final StudentInfo bookedFor;
 
 	@Override
-	public String getTitle() {
-		return null;
+	public NotificationType getType() {
+		return NotificationType.UNBOOKED;
 	}
-
-	@Override
-	public String getMessage() {
-		return null;
-	}
-
-	@Override
-	public PushNotificationData getData() {
-		return new UnbookedNotificationData(bookedClass, bookedFor);
-	}
-	
-
-	@Getter
-	@RequiredArgsConstructor
-	public class UnbookedNotificationData implements PushNotificationData {
-		private final ScheduledClass bookedClass;
-		private final StudentInfo bookedFor;
-		
-		
-		@Override
-		public NotificationType getType() {
-			return NotificationType.UNBOOKED;
-		}
-		
-		public String getBookedClassId() {
-			return bookedClass.getId();
-		}
-		
-		public String getStudentId() {
-			return bookedFor.getId();
-		}
-		
-		public String getStudentDisplayName() {
-			return bookedFor.getDisplayName();
-		}
-		
-		public boolean isApproved() {
-			return bookedClass.isApprovedFor(bookedFor);
-		}
-	}
-
 }
