@@ -111,8 +111,17 @@ public class BookingService {
 		updatedClass = scheduledClassRepository.save(updatedClass);
 		// notify student
 		notificationService.unbooked(updatedClass, student, canceledBy);
+		if (isFull(bookedClass)) {
+			return updatedClass;
+		}
 		// handle waiting list
 		return waitingListStrategy.placeFreed(updatedClass);
+	}
+
+	private boolean isFull(ScheduledClass scheduledClass) {
+		int maxStudents = scheduledClass.getLesson().getInfo().getMaxStudents();
+		int numBookings = scheduledClass.getBookings().size();
+		return numBookings >= maxStudents;
 	}
 
 	private boolean isApproved(ScheduledClass scheduledClass) {
