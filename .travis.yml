@@ -8,11 +8,18 @@ cache:
 script:
 - ./mvnw package
 
+before_deploy:
+- export DATE_TIME=`date +"%d-%m-%y %H:%M"`
+- git config --local user.name "travis"
+- git config --local user.email "travis@yopmail.com"
+- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M')-$(git log --format=%h -1)}
+- git tag $TRAVIS_TAG
+
 deploy:
   provider: releases
-  api_key:
-    secure: $GITHUB_API_TOKEN
+  api_key: $GITHUB_API_TOKEN
   file: target/yoga-booking-0.0.1-SNAPSHOT.jar
+  name: "$TRAVIS_BRANCH $DATE_TIME"
   skip_cleanup: true
   draft: true
   on:
