@@ -1,5 +1,10 @@
 package fr.yoga.booking.service.business.security;
 
+import static fr.yoga.booking.domain.account.Role.GOD;
+import static fr.yoga.booking.domain.account.Role.TEACHER;
+import static fr.yoga.booking.util.UserUtils.hasAnyRole;
+import static fr.yoga.booking.util.UserUtils.isSameUser;
+
 import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.Student;
@@ -15,14 +20,23 @@ public class SensitiveInformationService {
 	private final UserService userService;
 
 	public StudentInfo anonymize(StudentInfo student) throws UserException {
-		// TODO: if current user => show info ?
 		// TODO: if current user booked for friend and student is the friend => show info ?
 		if(!student.isRegistered()) {
 			// TODO: display name of unregistered users or anonymize by default ?
 			return student;
 		}
 		User user = userService.getUser(student.getId());
-		if(visibleByOtherStudents(user)) {
+		User currentUser = userService.getCurrentUser();
+		// user can see its own name
+		if (isSameUser(user, currentUser)) {
+			return student;
+		}
+		// user can see other student name only if agreed
+		if (visibleByOtherStudents(user)) {
+			return student;
+		}
+		// teacher can see all names
+		if (hasAnyRole(currentUser, GOD, TEACHER)) {
 			return student;
 		}
 		return new StudentInfo(student.getId(), "<anonyme>", student.getEmail(), student.getPhoneNumber());

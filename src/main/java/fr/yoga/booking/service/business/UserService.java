@@ -3,6 +3,7 @@ package fr.yoga.booking.service.business;
 import static fr.yoga.booking.domain.account.Role.STUDENT;
 import static fr.yoga.booking.domain.account.Role.TEACHER;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.Account;
@@ -27,6 +28,7 @@ import fr.yoga.booking.service.business.security.annotation.CanViewStudentInfo;
 import fr.yoga.booking.service.business.security.annotation.CanViewTeacherInfo;
 import fr.yoga.booking.service.business.security.annotation.CanViewUserInfo;
 import fr.yoga.booking.service.technical.security.PasswordService;
+import fr.yoga.booking.service.technical.security.UserDetailsWrapper;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -101,6 +103,14 @@ public class UserService {
 			// skip
 		}
 		throw new UserNotFoundException(userId);
+	}
+	
+	public User getCurrentUser() {
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal instanceof UserDetailsWrapper) {
+			return ((UserDetailsWrapper) principal).getUser();
+		}
+		return null;
 	}
 	
 	private boolean exists(User user) {

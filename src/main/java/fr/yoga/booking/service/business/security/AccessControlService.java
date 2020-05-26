@@ -2,13 +2,11 @@ package fr.yoga.booking.service.business.security;
 
 import static fr.yoga.booking.domain.account.Role.GOD;
 import static fr.yoga.booking.domain.account.Role.TEACHER;
-import static java.util.Arrays.asList;
-
-import java.util.List;
+import static fr.yoga.booking.util.UserUtils.hasAnyRole;
+import static fr.yoga.booking.util.UserUtils.isSameUser;
 
 import org.springframework.stereotype.Service;
 
-import fr.yoga.booking.domain.account.Role;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.account.User;
@@ -22,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class AccessControlService {
 	
 	public boolean canViewUserInfo(User currentUser, String userId) {
-		if(hasAnyRole(currentUser, GOD)) {
+		if(hasAnyRole(currentUser, GOD, TEACHER)) {
 			return true;
 		}
 		// can see his own profile
@@ -217,28 +215,5 @@ public class AccessControlService {
 	public boolean canUnregisterNotificationToken(User currentUser, User forUser) {
 		return true;
 	}
-	
-	private boolean hasAnyRole(User user, Role... anyRole) {
-		if(user == null) {
-			return false;
-		}
-		List<Role> roles = asList(anyRole);
-		return user.getAccount().getRoles()
-				.stream()
-				.anyMatch(roles::contains);
-	}
-	
-	private boolean isSameUser(User a, User b) {
-		if(a == null || b == null) {
-			return false;
-		}
-		return a.isSame(b);
-	}
-	
-	private boolean isSameUser(User user, String userId) {
-		if(user == null || userId == null) {
-			return false;
-		}
-		return user.isSame(userId);
-	}
+
 }
