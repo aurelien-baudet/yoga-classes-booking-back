@@ -13,8 +13,9 @@ public class LessonInfo {
 	private String description;
 	private int maxStudents;
 	private List<Image> photos;
+	private LessonDifficulty difficulty;
 	
 	public LessonInfo() {
-		this(null, null, 0, new ArrayList<>());
+		this(null, null, 0, new ArrayList<>(), new LessonDifficulty());
 	}
 }

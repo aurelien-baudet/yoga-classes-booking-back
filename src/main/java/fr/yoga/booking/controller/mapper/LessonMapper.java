@@ -14,6 +14,7 @@ public abstract class LessonMapper {
 	@Mapping(target = "description", source = "info.description")
 	@Mapping(target = "maxStudents", source = "info.maxStudents")
 	@Mapping(target = "photos", source = "info.photos")
+	@Mapping(target = "difficulty", source = "info.difficulty")
 	public abstract LessonDto toDto(Lesson lesson);
 
 	public abstract List<LessonDto> toDto(List<Lesson> lessons);
