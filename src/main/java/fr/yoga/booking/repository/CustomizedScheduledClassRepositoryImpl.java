@@ -16,7 +16,7 @@ import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
-import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -25,49 +25,38 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 	private final MongoOperations mongo;
 	
 	@Override
-	public List<ScheduledClass> findNextBookedClassesForStudent(StudentInfo student) {
-		if(student.isRegistered()) {
-			return findNextBookedClassesForStudent(student.toStudent());
-		}
-		return findNextBookedClassesForStudent(student.toUnregisteredUser());
+	public List<ScheduledClass> findNextBookedClassesForStudent(StudentRef student) {
+		Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
+		Criteria where = where("start").gte(today)
+				.and("bookings").elemMatch(userCriteria(student));
+		return mongo.find(query(where), ScheduledClass.class);
 	}
 	
 	@Override
 	public List<ScheduledClass> findNextBookedClassesForStudent(Student student) {
-		Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
-		Criteria where = where("start").gte(today)
-				.and("bookings").elemMatch(registeredUserCriteria(student));
-		return mongo.find(query(where), ScheduledClass.class);
+		return findNextBookedClassesForStudent(new StudentRef(student));
 	}
 
 	@Override
 	public List<ScheduledClass> findNextBookedClassesForStudent(UnregisteredUser student) {
-		Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
-		Criteria where = where("start").gte(today)
-				.and("bookings").elemMatch(unregisteredUserCriteria(student));
-		return mongo.find(query(where), ScheduledClass.class);
+		return findNextBookedClassesForStudent(new StudentRef(student));
 	}
 
 	@Override
-	public boolean existsBookedClassForStudent(ScheduledClass bookedClass, StudentInfo student) {
-		if(student.isRegistered()) {
-			return existsBookedClassForStudent(bookedClass, student.toStudent());
-		}
-		return existsBookedClassForStudent(bookedClass, student.toUnregisteredUser());
+	public boolean existsBookedClassForStudent(ScheduledClass bookedClass, StudentRef student) {
+		Criteria where = where("_id").is(bookedClass.getId())
+				.and("bookings").elemMatch(userCriteria(student));
+		return mongo.exists(query(where), ScheduledClass.class);
 	}
 
 	@Override
 	public boolean existsBookedClassForStudent(ScheduledClass bookedClass, Student student) {
-		Criteria where = where("_id").is(bookedClass.getId())
-				.and("bookings").elemMatch(registeredUserCriteria(student));
-		return mongo.exists(query(where), ScheduledClass.class);
+		return existsBookedClassForStudent(bookedClass, new StudentRef(student));
 	}
 
 	@Override
 	public boolean existsBookedClassForStudent(ScheduledClass bookedClass, UnregisteredUser student) {
-		Criteria where = where("_id").is(bookedClass.getId())
-				.and("bookings").elemMatch(unregisteredUserCriteria(student));
-		return mongo.exists(query(where), ScheduledClass.class);
+		return existsBookedClassForStudent(bookedClass, new StudentRef(student));
 	}
 
 	@Override
@@ -91,13 +80,8 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 		return mongo.find(query(where), ScheduledClass.class);
 	}
 
-	private Criteria registeredUserCriteria(Student student) {
+	private Criteria userCriteria(StudentRef student) {
 		return where("student._id").is(student.getId());
 	}
 
-	private Criteria unregisteredUserCriteria(UnregisteredUser student) {
-		return where("student.displayName").is(student.getDisplayName())
-				.and("student.email").is(student.getEmail())
-				.and("student.phoneNumber").is(student.getPhoneNumber());
-	}
 }

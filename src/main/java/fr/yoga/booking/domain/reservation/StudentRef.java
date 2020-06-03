@@ -9,25 +9,24 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentInfo {
+public class StudentRef {
 	private String id;
 	private String displayName;
-	private String email;
-	private String phoneNumber;
+	private boolean registered;
 	
-	public StudentInfo(Student student) {
-		this(student.getId(), student.getDisplayName(), null, null);
+	public StudentRef(Student student) {
+		this(student.getId(), student.getDisplayName(), true);
 	}
 	
-	public StudentInfo(UnregisteredUser student) {
-		this(null, student.getDisplayName(), student.getEmail(), student.getPhoneNumber());
+	public StudentRef(UnregisteredUser student) {
+		this(student.getId(), student.getDisplayName(), false);
 	}
 	
 	public boolean isRegistered() {
-		return id != null;
+		return registered;
 	}
 	
-	public boolean isSame(StudentInfo other) {
+	public boolean isSame(StudentRef other) {
 		if(isRegistered() && other.isRegistered()) {
 			return toStudent().isSame(other.toStudent());
 		}
@@ -56,6 +55,6 @@ public class StudentInfo {
 	}
 	
 	public UnregisteredUser toUnregisteredUser() {
-		return new UnregisteredUser(displayName, email, phoneNumber);
+		return new UnregisteredUser(id);
 	}
 }

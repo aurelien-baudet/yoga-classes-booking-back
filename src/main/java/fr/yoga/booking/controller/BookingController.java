@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.yoga.booking.controller.dto.ScheduledClassDto;
 import fr.yoga.booking.controller.mapper.ScheduledClassMapper;
-import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.service.business.BookingService;
 import fr.yoga.booking.service.business.ClassService;
 import fr.yoga.booking.service.business.UserService;
@@ -42,7 +42,7 @@ public class BookingController {
 	@PostMapping("{classId}/bookings/{studentId}")
 	public ScheduledClassDto book(@PathVariable("classId") String classId, @PathVariable("studentId") String studentId, @AuthenticationPrincipal UserDetailsWrapper currentUser) throws UserException, ScheduledClassException, BookingException {
 		User bookedBy = userService.getUserInfo(currentUser != null ? currentUser.getUser().getId() : studentId);
-		Student student = userService.getStudent(studentId);
+		StudentRef student = userService.getStudentRef(studentId);
 		ScheduledClass bookedClass = classService.getClass(classId);
 		return classMapper.toDto(bookingService.book(bookedClass, student, bookedBy));
 	}
@@ -58,7 +58,7 @@ public class BookingController {
 	@DeleteMapping("{classId}/bookings/{studentId}")
 	public ScheduledClassDto unbook(@PathVariable("classId") String classId, @PathVariable("studentId") String studentId, @AuthenticationPrincipal UserDetailsWrapper currentUser) throws UserException, ScheduledClassException, BookingException {
 		User canceledBy = userService.getUserInfo(currentUser != null ? currentUser.getUser().getId() : studentId);
-		Student student = userService.getStudent(studentId);
+		StudentRef student = userService.getStudentRef(studentId);
 		ScheduledClass bookedClass = classService.getClass(classId);
 		return classMapper.toDto(bookingService.unbook(bookedClass, student, canceledBy));
 	}
@@ -73,15 +73,13 @@ public class BookingController {
 	
 	@GetMapping("bookings/{studentId}")
 	public List<ScheduledClassDto> listBookedClasses(@PathVariable("studentId") String studentId) throws UserException {
-		Student student = userService.getStudent(studentId);
+		StudentRef student = userService.getStudentRef(studentId);
 		return classMapper.toDto(bookingService.listBookedClassesBy(student));
 	}
 	
 	@GetMapping("bookings")
-	public List<ScheduledClassDto> listBookedClasses(@RequestParam("displayName") String displayName, 
-													@RequestParam(name="email", required=false) String email,
-													@RequestParam(name="phoneNumber", required=false) String phoneNumber) throws UserException {
-		UnregisteredUser student = new UnregisteredUser(displayName, email, phoneNumber);
+	public List<ScheduledClassDto> listBookedClassesForUnregisteredUser(@RequestParam("id") String id) throws UserException {
+		UnregisteredUser student = new UnregisteredUser(id);
 		return classMapper.toDto(bookingService.listBookedClassesBy(student));
 	}
 }

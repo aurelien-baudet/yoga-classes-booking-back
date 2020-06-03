@@ -23,18 +23,18 @@ public class Booking {
 //	@NotNull
 	private User bookedBy;
 	@NotNull
-	private StudentInfo student;
+	private StudentRef student;
 	private boolean approved;
 	
 	public Booking(Instant bookDate, User bookedBy, Student student, boolean approved) {
-		this(bookDate, bookedBy, new StudentInfo(student), approved);
+		this(bookDate, bookedBy, new StudentRef(student), approved);
 	}
 
 	public Booking(Instant bookDate, User bookedBy, UnregisteredUser student, boolean approved) {
-		this(bookDate, bookedBy, new StudentInfo(student), approved);
+		this(bookDate, bookedBy, new StudentRef(student), approved);
 	}
 	
-	public boolean isForStudent(StudentInfo student) {
+	public boolean isForStudent(StudentRef student) {
 		return this.student.isSame(student);
 	}
 	

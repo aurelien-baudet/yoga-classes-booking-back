@@ -5,22 +5,22 @@
 <@layout.header />
 Je vous remercie de votre inscription
 
-<#if !data.isApproved()>
+<#if !approved>
 	<@information.waitingMessage />
 	
 	
 ---------------------------------------------
 </#if> 
 
-<@class.bookedClassPreview scheduledClass=data.bookedClass bookedFor=data.bookedFor place=data.bookedClass.lesson.place>
+<@class.bookedClassPreview scheduledClass=bookedClass bookedFor=bookedFor place=bookedClass.lesson.place>
 
 
-	Voir les informations du cours : ${@deploymentContextService.viewClassUrl(data.bookedClass)}
-	Vous désinscrire               : ${@deploymentContextService.unbookUrl(data.bookedClass)}
+	Voir les informations du cours : ${@deploymentContextService.viewClassUrl(bookedClass)}
+	Vous désinscrire               : ${@deploymentContextService.unbookUrl(bookedClass)}
 </@>
 
 
-<#if data.isApproved()>
+<#if approved>
 ---------------------------------------------
 
 Quelques informations supplémentaires
@@ -29,5 +29,5 @@ Quelques informations supplémentaires
     
     
 </#if>
-<@information.description scheduledClass=data.bookedClass />
+<@information.description scheduledClass=bookedClass />
 <@layout.footer />

@@ -1,5 +1,7 @@
 package fr.yoga.booking.domain.account;
 
+import javax.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,32 +10,55 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnregisteredUser {
+	private String id;
 	private String displayName;
-	private String email;
-	private String phoneNumber;
-	private Boolean sendBookedMail;
-	
-	public UnregisteredUser(String displayName, String email, String phoneNumber) {
-		this(displayName, email, phoneNumber, null);
+	@NotNull
+	private ContactInfo contact;
+	@NotNull
+	private UnregisteredUserPreferences preferences;
+
+	public UnregisteredUser(String id) {
+		this(id, null, new ContactInfo(), new UnregisteredUserPreferences());
 	}
 	
+	public UnregisteredUser(String id, String displayName, ContactInfo contact, String phoneNumber) {
+		this(id, displayName, contact, new UnregisteredUserPreferences());
+	}
+
+	public UnregisteredUser(String displayName, ContactInfo contact, UnregisteredUserPreferences preferences) {
+		this(null, displayName, contact, preferences);
+	}
+	
+//	public boolean isSame(UnregisteredUser other) {
+//		return uid.equals(anObject)
+////		return displayName.equals(other.getDisplayName())
+////				&& isSameContact(other.getContact()); 
+//	}
+
 	public boolean isSame(UnregisteredUser other) {
-		return displayName.equals(other.getDisplayName())
-				&& isSameEmail(other.getEmail())
-				&& isSamePhoneNumber(other.getPhoneNumber()); 
+		return other != null && isSame(other.getId());
 	}
-
-	private boolean isSameEmail(String email) {
-		if(this.email == null) {
-			return email == null;
-		}
-		return this.email.equals(email);
+	
+	public boolean isSame(String otherId) {
+		return otherId != null && id.equals(otherId);
 	}
-
-	private boolean isSamePhoneNumber(String phoneNumber) {
-		if(this.phoneNumber == null) {
-			return phoneNumber == null;
-		}
-		return this.phoneNumber.equals(phoneNumber);
-	}
+	
+//	private boolean isSameContact(ContactInfo contact) {
+//		return isSameEmail(contact.getEmail())
+//				&& isSamePhoneNumber(contact.getPhoneNumber()); 		
+//	}
+//	
+//	private boolean isSameEmail(String email) {
+//		if(contact.getEmail() == null) {
+//			return email == null;
+//		}
+//		return contact.getEmail().equals(email);
+//	}
+//
+//	private boolean isSamePhoneNumber(String phoneNumber) {
+//		if(contact.getPhoneNumber() == null) {
+//			return phoneNumber == null;
+//		}
+//		return contact.getPhoneNumber().equals(phoneNumber);
+//	}
 }

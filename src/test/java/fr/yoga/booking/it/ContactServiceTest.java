@@ -1,6 +1,7 @@
 package fr.yoga.booking.it;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -11,10 +12,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.EnabledIf;
 
 import fr.sii.ogham.core.exception.MessagingException;
+import fr.yoga.booking.domain.account.ContactInfo;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
@@ -27,21 +30,25 @@ import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
-import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.service.business.ContactService;
+import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
+import fr.yoga.booking.service.business.exception.user.UserException;
 
-@SpringBootTest
+@SpringBootTest(properties = "async.enabled=false")
 @ActiveProfiles("test")
 public class ContactServiceTest {
 	@Mock ScheduledClass bookedClass;
-	@Mock StudentInfo unregisteredStudent;
+	@Mock StudentRef unregisteredStudent;
 	@Mock Lesson lesson;
 	@Mock LessonInfo lessonInfo;
 	@Mock Teacher teacher;
 	@Mock Place place;
 	@Mock Place newPlace;
 	@Mock CancelData cancelData;
+	@Mock ContactInfo contact;
+	@MockBean UserService userService;
 	
 	@Autowired ContactService contactService;
 
@@ -55,10 +62,11 @@ public class ContactServiceTest {
 			"Place limitées , me contactez en MP.";
 	
 	@BeforeEach
-	public void setup() {
+	public void setup() throws UserException {
 		when(unregisteredStudent.getDisplayName()).thenReturn("Aurélien");
-		when(unregisteredStudent.getEmail()).thenReturn(System.getProperty("email.to"));
-		when(unregisteredStudent.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
+		when(userService.getContactInfo(any(StudentRef.class))).thenReturn(contact);
+		when(contact.getEmail()).thenReturn(System.getProperty("email.to"));
+		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
 		when(unregisteredStudent.isRegistered()).thenReturn(false);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
@@ -82,7 +90,7 @@ public class ContactServiceTest {
 	 */
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void approvedBooking() throws MessagingException, UnreachableUserException {
+	public void approvedBooking() throws MessagingException, UnreachableUserException, UserException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
 		contactService.sendMessage(unregisteredStudent, new BookedNotification(bookedClass, unregisteredStudent));
 	}
@@ -92,7 +100,7 @@ public class ContactServiceTest {
 	 */
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void waitingBooking() throws MessagingException, UnreachableUserException {
+	public void waitingBooking() throws MessagingException, UnreachableUserException, UserException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(false);
 		contactService.sendMessage(unregisteredStudent, new BookedNotification(bookedClass, unregisteredStudent));
 	}
@@ -102,7 +110,7 @@ public class ContactServiceTest {
 	 */
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void unbooked() throws MessagingException, UnreachableUserException {
+	public void unbooked() throws MessagingException, UnreachableUserException, UserException {
 		contactService.sendMessage(unregisteredStudent, new UnbookedNotification(bookedClass, unregisteredStudent));
 	}
 
@@ -111,7 +119,7 @@ public class ContactServiceTest {
 	 */
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void classCanceled() throws MessagingException, UnreachableUserException {
+	public void classCanceled() throws MessagingException, UnreachableUserException, UserException {
 		contactService.sendMessage(unregisteredStudent, new ClassCanceledNotification(bookedClass, cancelData));
 	}
 
@@ -120,7 +128,7 @@ public class ContactServiceTest {
 	 */
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void placeChanged() throws MessagingException, UnreachableUserException {
+	public void placeChanged() throws MessagingException, UnreachableUserException, UserException {
 		contactService.sendMessage(unregisteredStudent, new PlaceChangedNotification(bookedClass, place, newPlace));
 	}
 
@@ -129,7 +137,7 @@ public class ContactServiceTest {
 	 */
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void freePlaceBooked() throws MessagingException, UnreachableUserException {
+	public void freePlaceBooked() throws MessagingException, UnreachableUserException, UserException {
 		contactService.sendMessage(unregisteredStudent, new FreePlaceBookedNotification(bookedClass, unregisteredStudent));
 	}
 
@@ -138,7 +146,7 @@ public class ContactServiceTest {
 	 */
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void reminder() throws MessagingException, UnreachableUserException {
+	public void reminder() throws MessagingException, UnreachableUserException, UserException {
 		contactService.sendMessage(unregisteredStudent, new ReminderNotification(bookedClass, unregisteredStudent));
 	}
 }

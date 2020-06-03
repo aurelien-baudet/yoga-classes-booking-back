@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.yoga.booking.controller.dto.NewStudent;
 import fr.yoga.booking.controller.dto.NewTeacher;
+import fr.yoga.booking.controller.dto.NewUnregisteredUser;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
+import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.user.AccountException;
@@ -47,6 +49,11 @@ public class UserController {
 	@PostMapping("students")
 	public Student regiterStudent(@RequestBody NewStudent newStudent) throws AccountException {
 		return userService.registerStudent(newStudent.getDisplayName(), newStudent.getCredentials(), newStudent.getContact(), newStudent.getPreferences());
+	}
+
+	@PostMapping("unregistered")
+	public UnregisteredUser saveUnregisteredUserInfo(@RequestBody NewUnregisteredUser newUnregisteredUser) {
+		return userService.saveUnregisteredUserInfo(newUnregisteredUser.getDisplayName(), newUnregisteredUser.getContact(), newUnregisteredUser.getPreferences());
 	}
 
 	@PostMapping("teachers")

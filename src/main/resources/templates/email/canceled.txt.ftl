@@ -3,16 +3,16 @@
 <#import "fragments/class.txt.ftl" as class>
 <#import "fragments/information.txt.ftl" as information>
 <@layout.header />
-Cours du ${statics['fr.yoga.booking.util.DateRangeUtil'].format(data.canceledClass.start, data.canceledClass.end)} annulé
+Cours du ${statics['fr.yoga.booking.util.DateRangeUtil'].format(canceledClass.start, canceledClass.end)} annulé
 
-<@class.classPreview scheduledClass=data.canceledClass />
+<@class.classPreview scheduledClass=canceledClass />
 
 
 ---------------------------------------------
 
-Message de ${data.canceledClass.lesson.teacher.displayName}
+Message de ${canceledClass.lesson.teacher.displayName}
 
 	<@utils.indent>
-	${data.additionalInfo.message}
+	${additionalInfo.message}
 	</@>
 <@layout.footer />

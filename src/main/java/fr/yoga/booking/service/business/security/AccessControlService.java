@@ -13,6 +13,7 @@ import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -159,6 +160,13 @@ public class AccessControlService {
 		return false;
 	}
 	
+	public boolean canListBookedClasses(User currentUser, StudentRef student) {
+		if (!student.isRegistered()) {
+			return false;
+		}
+		return canListBookedClasses(currentUser, student.toStudent());
+	}
+	
 	public boolean canListBookedClasses(User currentUser, Student student) {
 		if(hasAnyRole(currentUser, GOD)) {
 			return true;
@@ -179,6 +187,10 @@ public class AccessControlService {
 //			return true;
 //		}
 		// TODO: should not be able to see booked classes of any unregistered user
+		return true;
+	}
+	
+	public boolean canBookClass(User currentUser, ScheduledClass bookedClass, StudentRef student, User bookedBy) {
 		return true;
 	}
 	

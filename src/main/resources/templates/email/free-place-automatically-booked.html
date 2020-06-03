@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout.html :: header(~{::title}, ~{::link})">
-	<title>Une place vient de se libérer pour le cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(data.bookedClass.start, data.bookedClass.end)}]]</title>
+	<title>Une place vient de se libérer pour le cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(bookedClass.start, bookedClass.end)}]]</title>
 	<link th:href="@{css/booked.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
 	<h1>Une place vient de se libérer et vous êtes maintenant inscrit au cours</h1>
-	<div th:replace="fragments/class.html :: bookedClassPreview(${data.bookedClass}, ${data.student}, ${data.bookedClass.lesson.place}, ~{::.actions})">
+	<div th:replace="fragments/class.html :: bookedClassPreview(${bookedClass}, ${student}, ${bookedClass.lesson.place}, ~{::.actions})">
 		<div class="actions">
-			<a class="button open" th:href="${@deploymentContextService.viewClassUrl(data.bookedClass)}">Voir les informations du cours</a>
-			<a class="button unbook" th:href="${@deploymentContextService.unbookUrl(data.bookedClass)}">Vous désinscrire</a>
+			<a class="button open" th:href="${@deploymentContextService.viewClassUrl(bookedClass)}">Voir les informations du cours</a>
+			<a class="button unbook" th:href="${@deploymentContextService.unbookUrl(bookedClass)}">Vous désinscrire</a>
 		</div>
 	</div>
 	<div class="message">
@@ -18,7 +18,7 @@
 		</h2>
 		<p th:replace="fragments/information.html :: approvedMessage"></p>
 	</div>
-	<div th:replace="fragments/information.html :: description(${data.bookedClass})"></div>
+	<div th:replace="fragments/information.html :: description(${bookedClass})"></div>
 	<footer th:replace="fragments/layout.html :: footer"></footer>
 </body>
 </html>

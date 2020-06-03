@@ -1,7 +1,7 @@
 package fr.yoga.booking.domain.notification;
 
 import fr.yoga.booking.domain.reservation.ScheduledClass;
-import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReminderNotification implements Notification {
 	private final ScheduledClass nextClass;
-	private final StudentInfo bookedFor;
+	private final StudentRef bookedFor;
 
 	@Override
 	public NotificationType getType() {

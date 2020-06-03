@@ -48,7 +48,7 @@ public class ScheduledClass {
 		return this;
 	}
 	
-	public ScheduledClass removeBookingForStudent(StudentInfo bookedFor) {
+	public ScheduledClass removeBookingForStudent(StudentRef bookedFor) {
 		List<Booking> filtered = getBookings()
 			.stream()
 			.filter(booking -> !booking.isForStudent(bookedFor))
@@ -69,14 +69,14 @@ public class ScheduledClass {
 		return this;
 	}
 	
-	public List<StudentInfo> allStudents() {
+	public List<StudentRef> allStudents() {
 		return getBookings()
 				.stream()
 				.map(b -> b.getStudent())
 				.collect(toList());
 	}
 	
-	public boolean isApprovedFor(StudentInfo student) {
+	public boolean isApprovedFor(StudentRef student) {
 		return getBookings()
 				.stream()
 				.filter(b -> b.isForStudent(student))

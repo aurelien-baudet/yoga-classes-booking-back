@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.User;
-import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.user.UserException;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class SensitiveInformationService {
 	private final UserService userService;
 
-	public StudentInfo anonymize(StudentInfo student) throws UserException {
+	public StudentRef anonymize(StudentRef student) throws UserException {
 		// TODO: if current user booked for friend and student is the friend => show info ?
 		if(!student.isRegistered()) {
 			// TODO: display name of unregistered users or anonymize by default ?
@@ -39,7 +39,7 @@ public class SensitiveInformationService {
 		if (hasAnyRole(currentUser, GOD, TEACHER)) {
 			return student;
 		}
-		return new StudentInfo(student.getId(), "<anonyme>", student.getEmail(), student.getPhoneNumber());
+		return new StudentRef(student.getId(), "<anonyme>", student.isRegistered());
 	}
 
 

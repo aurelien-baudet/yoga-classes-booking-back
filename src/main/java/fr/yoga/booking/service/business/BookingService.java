@@ -13,7 +13,7 @@ import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.notification.Reminder;
 import fr.yoga.booking.domain.reservation.Booking;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
-import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.repository.ScheduledClassRepository;
 import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedException;
 import fr.yoga.booking.service.business.exception.reservation.BookingException;
@@ -35,22 +35,56 @@ public class BookingService {
 	
 	@CanBookClass
 	public ScheduledClass book(ScheduledClass bookedClass, Student student, User bookedBy) throws BookingException {
-		return book(bookedClass, new StudentInfo(student), bookedBy);
+		return book(bookedClass, new StudentRef(student), bookedBy);
 	}
 	
 	@CanBookClass
 	public ScheduledClass book(ScheduledClass bookedClass, UnregisteredUser student, User bookedBy) throws BookingException {
-		return book(bookedClass, new StudentInfo(student), bookedBy);
+		return book(bookedClass, new StudentRef(student), bookedBy);
 	}
+	
+	@CanBookClass
+	public ScheduledClass book(ScheduledClass bookedClass, StudentRef student, User bookedBy) throws BookingException {
+		if(alreadyBooked(bookedClass, student)) {
+			throw new AlreadyBookedException(bookedClass, student);
+		}
+		ScheduledClass updatedClass = bookedClass.addBooking(new Booking(Instant.now(), bookedBy, student, isApproved(bookedClass)));
+		updatedClass = scheduledClassRepository.save(updatedClass);
+		// notify student
+		notificationService.booked(updatedClass, student, bookedBy);
+		return updatedClass;
+	}
+
 
 	@CanUnbookClass
 	public ScheduledClass unbook(ScheduledClass bookedClass, Student student, User canceledBy) throws BookingException {
-		return unbook(bookedClass, new StudentInfo(student), canceledBy);
+		return unbook(bookedClass, new StudentRef(student), canceledBy);
 	}
 
 	@CanUnbookClass
 	public ScheduledClass unbook(ScheduledClass bookedClass, UnregisteredUser student, User canceledBy) throws BookingException {
-		return unbook(bookedClass, new StudentInfo(student), canceledBy);
+		return unbook(bookedClass, new StudentRef(student), canceledBy);
+	}
+	
+	@CanUnbookClass
+	public ScheduledClass unbook(ScheduledClass bookedClass, StudentRef student, User canceledBy) throws NotBookedException {
+		if(notBooked(bookedClass, student)) {
+			throw new NotBookedException(bookedClass, student);
+		}
+		ScheduledClass updatedClass = bookedClass.removeBookingForStudent(student);
+		updatedClass = scheduledClassRepository.save(updatedClass);
+		// notify student
+		notificationService.unbooked(updatedClass, student, canceledBy);
+		if (isFull(bookedClass)) {
+			return updatedClass;
+		}
+		// handle waiting list
+		return waitingListStrategy.placeFreed(updatedClass);
+	}
+	
+	@CanListBookedClasses
+	public List<ScheduledClass> listBookedClassesBy(StudentRef student) {
+		return scheduledClassRepository.findNextBookedClassesForStudent(student);
 	}
 	
 	@CanListBookedClasses
@@ -84,7 +118,7 @@ public class BookingService {
 		if (nextClass == null) {
 			return;
 		}
-		List<StudentInfo> approvedStudents = listApprovedBookings(nextClass)
+		List<StudentRef> approvedStudents = listApprovedBookings(nextClass)
 				.stream()
 				.map(b -> b.getStudent())
 				.collect(toList());
@@ -92,32 +126,6 @@ public class BookingService {
 	}
 
 	
-	private ScheduledClass book(ScheduledClass bookedClass, StudentInfo student, User bookedBy) throws BookingException {
-		if(alreadyBooked(bookedClass, student)) {
-			throw new AlreadyBookedException(bookedClass, student);
-		}
-		ScheduledClass updatedClass = bookedClass.addBooking(new Booking(Instant.now(), bookedBy, student, isApproved(bookedClass)));
-		updatedClass = scheduledClassRepository.save(updatedClass);
-		// notify student
-		notificationService.booked(updatedClass, student, bookedBy);
-		return updatedClass;
-	}
-
-	private ScheduledClass unbook(ScheduledClass bookedClass, StudentInfo student, User canceledBy) throws NotBookedException {
-		if(notBooked(bookedClass, student)) {
-			throw new NotBookedException(bookedClass, student);
-		}
-		ScheduledClass updatedClass = bookedClass.removeBookingForStudent(student);
-		updatedClass = scheduledClassRepository.save(updatedClass);
-		// notify student
-		notificationService.unbooked(updatedClass, student, canceledBy);
-		if (isFull(bookedClass)) {
-			return updatedClass;
-		}
-		// handle waiting list
-		return waitingListStrategy.placeFreed(updatedClass);
-	}
-
 	private boolean isFull(ScheduledClass scheduledClass) {
 		int maxStudents = scheduledClass.getLesson().getInfo().getMaxStudents();
 		int numBookings = scheduledClass.getBookings().size();
@@ -130,11 +138,11 @@ public class BookingService {
 		return numBookings < maxStudents;
 	}
 
-	private boolean alreadyBooked(ScheduledClass bookedClass, StudentInfo student) {
+	private boolean alreadyBooked(ScheduledClass bookedClass, StudentRef student) {
 		return scheduledClassRepository.existsBookedClassForStudent(bookedClass, student);
 	}
 
-	private boolean notBooked(ScheduledClass bookedClass, StudentInfo student) {
+	private boolean notBooked(ScheduledClass bookedClass, StudentRef student) {
 		return !scheduledClassRepository.existsBookedClassForStudent(bookedClass, student);
 	}
 }

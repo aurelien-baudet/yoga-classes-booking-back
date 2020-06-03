@@ -5,11 +5,11 @@
 <@layout.header />
 Rappel au cas où vous auriez oublié
 
-<@class.bookedClassPreview scheduledClass=data.nextClass bookedFor=data.bookedFor place=data.nextClass.lesson.place>
+<@class.bookedClassPreview scheduledClass=nextClass bookedFor=bookedFor place=nextClass.lesson.place>
 
 
-	Voir les informations du cours : ${@deploymentContextService.viewClassUrl(data.nextClass)}
-	Vous désinscrire               : ${@deploymentContextService.unbookUrl(data.nextClass)}
+	Voir les informations du cours : ${@deploymentContextService.viewClassUrl(nextClass)}
+	Vous désinscrire               : ${@deploymentContextService.unbookUrl(nextClass)}
 </@>
 
 
@@ -20,5 +20,5 @@ Quelques informations supplémentaires
     <@information.approvedMessage />
     
    
-<@information.description scheduledClass=data.nextClass />
+<@information.description scheduledClass=nextClass />
 <@layout.footer />

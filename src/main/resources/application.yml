@@ -15,6 +15,7 @@ ogham:
       classpath:
         path-prefix: /templates/sms/
         path-suffix: .txt.ftl
+      
   
 logging:
   level:

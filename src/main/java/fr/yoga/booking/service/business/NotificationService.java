@@ -18,7 +18,7 @@ import fr.yoga.booking.domain.reservation.Booking;
 import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
-import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.repository.PushNotificationTokenRepository;
 import fr.yoga.booking.service.business.exception.NotificationException;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
@@ -52,24 +52,24 @@ public class NotificationService {
 
 	public void classCanceled(ScheduledClass scheduledClass, CancelData additionalInfo) {
 		log.info("[{}] class canceled. Message: {}", scheduledClass.getId(), additionalInfo.getMessage());
-		for(StudentInfo student : scheduledClass.allStudents()) {
+		for(StudentRef student : scheduledClass.allStudents()) {
 			notify(student, new ClassCanceledNotification(scheduledClass, additionalInfo));
 		}
 	}
 
 	public void placeChanged(ScheduledClass scheduledClass, Place oldPlace, Place newPlace) {
 		log.info("[{}] place changed {} -> {}", scheduledClass.getId(), oldPlace.getName(), newPlace.getName());
-		for(StudentInfo student : scheduledClass.allStudents()) {
+		for(StudentRef student : scheduledClass.allStudents()) {
 			notify(student, new PlaceChangedNotification(scheduledClass, oldPlace, newPlace));
 		}
 	}
 
-	public void booked(ScheduledClass bookedClass, StudentInfo student, User bookedBy) {
+	public void booked(ScheduledClass bookedClass, StudentRef student, User bookedBy) {
 		log.info("[{}] booked for {}", bookedClass.getId(), student.getDisplayName());
 		notify(student, new BookedNotification(bookedClass, student));
 	}
 
-	public void unbooked(ScheduledClass bookedClass, StudentInfo student, User canceledBy) {
+	public void unbooked(ScheduledClass bookedClass, StudentRef student, User canceledBy) {
 		log.info("[{}] unbooked for {}", bookedClass.getId(), student.getDisplayName());
 		notify(student, new UnbookedNotification(bookedClass, student));
 	}
@@ -79,14 +79,14 @@ public class NotificationService {
 		notify(firstWaiting.getStudent(), new FreePlaceBookedNotification(scheduledClass, firstWaiting.getStudent()));
 	}
 
-	public void reminder(ScheduledClass nextClass, List<StudentInfo> approvedStudents) {
+	public void reminder(ScheduledClass nextClass, List<StudentRef> approvedStudents) {
 		log.info("[{}] remind students about next class", nextClass.getId());
-		for(StudentInfo student : approvedStudents) {
+		for(StudentRef student : approvedStudents) {
 			notify(student, new ReminderNotification(nextClass, student));
 		}
 	}
 
-	private void notify(StudentInfo student, Notification notification) {
+	private void notify(StudentRef student, Notification notification) {
 		try {
 			if(canReceivePushNotification(student)) {
 				sendPushNotification(student, notification);
@@ -107,17 +107,17 @@ public class NotificationService {
 		}
 	}
 
-	private boolean canReceivePushNotification(StudentInfo student) {
+	private boolean canReceivePushNotification(StudentRef student) {
 		return student.isRegistered() && pushNotificationTokenRepository.existsByUserId(student.getId());
 	}
 
-	private boolean shouldAlsoReceiveUsingOtherMeansOfCommunication(StudentInfo student, Notification notification) {
+	private boolean shouldAlsoReceiveUsingOtherMeansOfCommunication(StudentRef student, Notification notification) {
 		// TODO: should duplicate information for particular notification (like place change or class canceled for example) ?
 		// TODO: unregistered user has option to automatically receive email for booked classes (aim is to receive ics)
 		return false;
 	}
 
-	private void sendPushNotification(StudentInfo student, Notification data) throws NotificationException, UserException {
+	private void sendPushNotification(StudentRef student, Notification data) throws NotificationException, UserException {
 		UserPushToken mapping = pushNotificationTokenRepository.findFirstByUserIdOrderByRegistrationDateDesc(student.getId());
 		if(mapping != null) {
 			fcmService.sendPushNotification(userService.getUser(student.getId()), mapping.getToken(), data);

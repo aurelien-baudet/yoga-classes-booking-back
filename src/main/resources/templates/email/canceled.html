@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout.html :: header(~{::title}, ~{::link})">
-	<title>Annulation du cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(data.canceledClass.start, data.canceledClass.end)}]]</title>
+	<title>Annulation du cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(canceledClass.start, canceledClass.end)}]]</title>
 	<link th:href="@{css/canceled.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
-	<h1>Cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(data.canceledClass.start, data.canceledClass.end)}]] annulé</h1>
-	<div th:replace="fragments/class.html :: classPreview(${data.canceledClass}, ${null}, ~{})"></div>
+	<h1>Cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(canceledClass.start, canceledClass.end)}]] annulé</h1>
+	<div th:replace="fragments/class.html :: classPreview(${canceledClass}, ${null}, ~{})"></div>
 	<div class="message">
 		<h2>
-			Message de [[${data.canceledClass.lesson.teacher.displayName}]]
+			Message de [[${canceledClass.lesson.teacher.displayName}]]
 		</h2>
-		<p th:utext="${#strings.replace( #strings.escapeXml( data.additionalInfo.message ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}">
+		<p th:utext="${#strings.replace( #strings.escapeXml( additionalInfo.message ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}">
 			Message d'annulation
 		</p>
 	</div>

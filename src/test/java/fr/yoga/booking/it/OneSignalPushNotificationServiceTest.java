@@ -1,6 +1,7 @@
 package fr.yoga.booking.it;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
@@ -14,10 +15,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.EnabledIf;
 
 import fr.sii.ogham.core.exception.MessagingException;
+import fr.yoga.booking.domain.account.ContactInfo;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
@@ -30,10 +33,12 @@ import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
-import fr.yoga.booking.domain.reservation.StudentInfo;
+import fr.yoga.booking.domain.reservation.StudentRef;
+import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.NotificationException;
 import fr.yoga.booking.service.business.exception.PlaceException;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
+import fr.yoga.booking.service.business.exception.user.UserException;
 import fr.yoga.booking.service.technical.notification.OneSignalPushNotificationService;
 
 @SpringBootTest
@@ -41,7 +46,7 @@ import fr.yoga.booking.service.technical.notification.OneSignalPushNotificationS
 public class OneSignalPushNotificationServiceTest {
 	@Mock ScheduledClass bookedClass;
 	@Mock User user;
-	@Mock StudentInfo unregisteredStudent;
+	@Mock StudentRef unregisteredStudent;
 	@Mock Lesson lesson;
 	@Mock LessonInfo lessonInfo;
 	@Mock Teacher teacher;
@@ -49,6 +54,8 @@ public class OneSignalPushNotificationServiceTest {
 	@Mock Place newPlace;
 	@Mock Image newPlaceImage;
 	@Mock CancelData cancelData;
+	@Mock ContactInfo contact;
+	@MockBean UserService userService;
 	String token = "5bbcaf25-d3cd-4e4d-ac30-dba9fd719888";
 	
 	@Autowired OneSignalPushNotificationService onesignalService;
@@ -63,11 +70,12 @@ public class OneSignalPushNotificationServiceTest {
 			"Place limitées , me contactez en MP.";
 	
 	@BeforeEach
-	public void setup() throws MalformedURLException, PlaceException {
+	public void setup() throws MalformedURLException, PlaceException, UserException {
 		when(user.getDisplayName()).thenReturn("Aurélien");
 		when(unregisteredStudent.getDisplayName()).thenReturn("Aurélien");
-		when(unregisteredStudent.getEmail()).thenReturn(System.getProperty("email.to"));
-		when(unregisteredStudent.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
+		when(userService.getContactInfo(any(StudentRef.class))).thenReturn(contact);
+		when(contact.getEmail()).thenReturn(System.getProperty("email.to"));
+		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
 		when(unregisteredStudent.isRegistered()).thenReturn(false);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
