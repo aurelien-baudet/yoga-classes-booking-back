@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/layout.html :: header(~{::title}, ~{::link})">
+<head th:replace="fragments/layout.html :: head(~{::title}, ~{::link})">
 	<title>Rappel pour le cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(nextClass.start, nextClass.end)}]]</title>
 	<link th:href="@{css/booked.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
-	<h1>Rappel au cas où vous auriez oublié</h1>
+	<header th:replace="fragments/layout.html :: header(~{::h1}, ~{}, ~{::.status-icon})">
+		<h1>Rappel au cas où vous auriez oublié</h1>
+		<img class="status-icon" th:replace="fragments/components.html :: icon('booking-approved.png')" />
+	</header>
 	<div th:replace="fragments/class.html :: bookedClassPreview(${nextClass}, ${bookedFor}, ${nextClass.lesson.place}, ~{::.actions})">
 		<div class="actions">
-			<a class="button open" th:href="${@deploymentContextService.viewClassUrl(nextClass)}">Voir les informations du cours</a>
-			<a class="button unbook" th:href="${@deploymentContextService.unbookUrl(nextClass)}">Vous désinscrire</a>
+			<a class="open" th:href="${@deploymentContextService.viewClassUrl(nextClass)}">Voir le cours</a>
+			<a class="unbook" th:href="${@deploymentContextService.unbookUrl(nextClass)}">Vous désinscrire</a>
 		</div>
 	</div>
 	<div class="message">
@@ -19,6 +22,6 @@
 		<p th:replace="fragments/information.html :: approvedMessage"></p>
 	</div>
 	<div th:replace="fragments/information.html :: description(${nextClass})"></div>
-	<footer th:replace="fragments/layout.html :: footer"></footer>
+	<footer th:replace="fragments/layout.html :: footer(${bookedFor})"></footer>
 </body>
 </html>

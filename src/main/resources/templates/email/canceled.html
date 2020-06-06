@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/layout.html :: header(~{::title}, ~{::link})">
+<head th:replace="fragments/layout.html :: head(~{::title}, ~{::link})">
 	<title>Annulation du cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(canceledClass.start, canceledClass.end)}]]</title>
 	<link th:href="@{css/canceled.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
-	<h1>Cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(canceledClass.start, canceledClass.end)}]] annulé</h1>
+	<header th:replace="fragments/layout.html :: header(~{::h1}, ~{::.cancel-message}, ~{::.status-icon})">
+		<h1 class="canceled">Cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(canceledClass.start, canceledClass.end)}]] annulé</h1>
+		<div class="cancel-message">
+			<p th:utext="${#strings.replace( #strings.escapeXml( additionalInfo.message ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}">
+				Message d'annulation
+			</p>
+		</div>
+		<img class="status-icon" th:replace="fragments/components.html :: icon('canceled.png')" />
+	</header>
 	<div th:replace="fragments/class.html :: classPreview(${canceledClass}, ${null}, ~{})"></div>
-	<div class="message">
-		<h2>
-			Message de [[${canceledClass.lesson.teacher.displayName}]]
-		</h2>
-		<p th:utext="${#strings.replace( #strings.escapeXml( additionalInfo.message ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}">
-			Message d'annulation
-		</p>
-	</div>
-	<footer th:replace="fragments/layout.html :: footer"></footer>
+	<footer th:replace="fragments/layout.html :: footer(${bookedFor})"></footer>
 </body>
 </html>

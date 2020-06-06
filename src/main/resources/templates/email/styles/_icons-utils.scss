@@ -1,0 +1,6 @@
+@mixin icon-styles($styles) {
+	img {
+		width: map-get($styles, "width");
+		height: map-get($styles, "height");
+	}
+}

@@ -1,0 +1,145 @@
+@import "variables";
+@import "icons-utils";
+@import "button-utils";
+
+body {
+	width: value($layout, "width");
+	margin: auto;
+}
+
+.header {
+	background: value($header, "background.default-color") url('../images/header-background.jpg') repeat-x;
+
+	.logo {
+		text-align: center;
+		padding: value($layout, "header.logo.margin");
+		@include icon-styles(value($layout, "header.logo"));
+	}
+	
+	h1 {
+		font-size: value($layout, "header.title.font-size");
+		text-align: center;
+		font-weight: bold;	
+		color: value($header, "title.color");
+		padding-left: value($layout, "header.padding", "left");
+		padding-right: value($layout, "header.padding", "right");
+	}
+	
+	p {
+		font-size: value($layout, "header.message.font-size");
+		text-align: justify;
+		color: value($header, "message.color");
+		padding-left: value($layout, "header.padding", "left");
+		padding-right: value($layout, "header.padding", "right");
+	}
+	
+	.icon {
+		margin: value($layout, "header.icon.margin");
+		text-align: center;
+		@include icon-styles(value($layout, "header.icon"));
+		background: url('../images/status-icon-background.jpg') bottom left repeat-x;
+	}
+}
+
+.summary {
+	min-height: value($layout, "summary.min-height");
+	padding: value($layout, "summary.padding");
+	background: value($summary, "background.default-color") url('../images/summary-background.jpg') no-repeat;
+	
+	h2 {
+		font-size: value($layout, "summary.title.font-size");
+		margin-bottom: value($layout, "summary.title.spacing");
+		font-weight: bold;	
+	}
+	
+	&,
+	a {
+		color: value($summary, "color");
+	}
+	
+	.date,
+	.booked-for,
+	.place {
+		padding-top: value($layout, "summary.line.spacing");
+		padding-bottom: value($layout, "summary.line.spacing");
+	}
+	
+	.icon {
+		display: inline-block;
+		text-align: center;
+		width: value($layout, "summary.line.icon.width");
+		height: value($layout, "summary.line.icon.height");
+		vertical-align: middle;
+	}
+	
+	.text {
+		font-size: value($layout, "summary.line.text.font-size");		
+		padding: value($layout, "summary.line.text.padding");
+		vertical-align: middle;
+	}
+	
+	.actions {
+		margin: value($layout, "summary.actions.margin");
+		text-align: center;
+		
+		a {
+			margin-left: value($layout, "summary.actions.button.margin", "left") + value($layout, "summary.actions.button.spacing") / 2;
+			margin-right: value($layout, "summary.actions.button.margin", "right") + value($layout, "summary.actions.button.spacing") / 2;
+			margin-top: value($layout, "summary.actions.button.margin", "top");
+			margin-bottom: value($layout, "summary.actions.button.margin", "bottom");
+			display: inline-block;
+		}
+		a.open {
+			@include button(value($buttons, "primary"));
+		}
+		a.unbook {
+			@include button(value($buttons, "secondary"));
+		}
+	}
+}
+
+.message {
+	padding: value($layout, "message.padding");
+	background: value($message, "background.default-color") url('../images/information-background.jpg') top left repeat-x;
+	color: value($message, "color");
+
+	h2 {
+		font-size: value($layout, "message.title.font-size");		
+		margin: value($layout, "message.title.margin");		
+	}
+	
+	p {
+		font-size: value($layout, "message.text.font-size");
+		text-align: justify;		
+	}
+}
+
+.details {
+	padding: value($layout, "details.padding");
+	font-size: value($layout, "details.title.font-size");		
+	background: value($details, "background.default-color") url('../images/lesson-description-background.jpg') no-repeat;
+	color: value($details, "color");
+
+	h2 {
+		font-size: value($layout, "details.title.font-size");		
+		margin: value($layout, "details.title.margin");		
+	}
+	
+	p {
+		font-size: value($layout, "details.text.font-size");
+		text-align: justify;		
+	}
+}
+
+.footer {
+	padding: value($layout, "footer.padding");
+	font-size: value($layout, "footer.font-size");
+	background: value($footer, "background");
+	color: value($footer, "color");
+	text-align: center;
+
+	a {
+		color: value($footer, "unsubscribe-emails.color");
+		text-decoration: underline;
+	}
+}

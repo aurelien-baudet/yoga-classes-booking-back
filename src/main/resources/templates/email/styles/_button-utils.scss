@@ -1,0 +1,10 @@
+@import "variables";
+
+@mixin button($colors) {
+	padding: value($buttons, "padding");
+	font-size: value($buttons, "font-size");
+	background: value($colors, "background");
+	color: value($colors, "color");
+	border-radius: value($buttons, "border-radius");
+	font-weight: bold;
+}

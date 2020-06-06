@@ -202,6 +202,11 @@ public class AccessControlService {
 		return true;
 	}
 	
+	public boolean canUnbookClass(User currentUser, ScheduledClass bookedClass, StudentRef student, User canceledBy) {
+		// TODO: is anyone can unbook for anyone or only people who booked before ?
+		return true;
+	}
+	
 	public boolean canUnbookClass(User currentUser, ScheduledClass bookedClass, Student student, User canceledBy) {
 		// TODO: is anyone can unbook for anyone or only people who booked before ?
 		return true;

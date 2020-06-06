@@ -1,0 +1,162 @@
+@import "variable-utils";
+
+$main-colors: (
+  primary: (
+    normal:     #7B57BB,
+    contrast:   #ffffff,
+    shade:      #443464,
+    tint:       #9F9AEB
+  ),
+  secondary: (
+    normal:     #15101F,
+    contrast:   #ffffff,
+  ),
+  tertiary: (
+    normal:     #D5D3EB,
+    contrast:   #ffffff,
+  ),
+  warning: (
+    normal:     #5A1478,
+    contrast:   #ffffff,
+  )
+);
+
+
+$layout: (
+	"width": 600px,
+	"header": (
+		"padding": 0 70px 0 70px,
+		"logo": (
+			"margin": 35px 0 25px 0,
+			"width": 281px,
+			"height": 120px
+		),
+		"title": (
+			"font-size": 20px
+		),
+		"message": (
+			"font-size": 14px
+		),
+		"icon": (
+			"margin": 18px 0 0 0,
+			"width": 86px,
+			"height": 87px
+		)
+	),
+	"summary": (
+		"min-height": 300px - 25px - 25px,
+		"title": (
+			"font-size": 17px,
+			"spacing": 20px
+		),
+		"padding": 25px 70px 25px 70px,
+		"line": (
+			"spacing": 6px,
+			"icon": (
+				"width": 24px,
+				"height": 24px
+			),
+			"text": (
+				"font-size": 15px,
+				"padding": 0 0 0 20px
+			)
+		),
+		"actions": (
+			"margin": 35px 0 0 0,
+			"button": (
+				"margin": 5px 0,
+				"spacing": 16px
+			)
+		)
+	),
+	"message": (
+		"padding": 26px 70px,
+		"title": (
+			"font-size": 17px,
+			"margin": 0 0 26px 0,
+		),
+		"text": (
+			"font-size": 12px
+		)
+	),
+	"details": (
+		"padding": 26px 70px,
+		"title": (
+			"font-size": 17px,
+			"margin": 0 0 26px 0,
+		),
+		"text": (
+			"font-size": 12px
+		)
+	),
+	"footer": (
+		"padding": 28px 70px,
+		"font-size": 10px,
+	)
+);
+
+$header: (
+	"background": (
+		"default-color": value($main-colors, "tertiary.normal")
+	),
+	"title": (
+		"color": value($main-colors, "primary.normal"),
+	),
+	"message": (
+		"color": value($main-colors, "secondary.normal")
+	),
+	"canceled": (
+		"title": (
+			"color": value($main-colors, "primary.shade"),
+		)
+	)
+);
+
+$summary: (
+	"background": (
+		"default-color": value($main-colors, "primary.normal")
+	),
+	"color": value($main-colors, "primary.contrast")
+);
+
+$buttons: (
+	"padding": 10px 20px,
+	"border-radius": 40px,
+	"font-size": 15px,
+	"primary": (
+		"background": value($main-colors, "primary.contrast"),
+		"color": value($main-colors, "primary.normal")
+	),
+	"secondary": (
+		"background": value($main-colors, "secondary.normal"),
+		"color": value($main-colors, "secondary.contrast")
+	)
+);
+
+
+$message: (
+	"background": (
+		"default-color": value($main-colors, "tertiary.normal")
+	),
+	"color": value($main-colors, "primary.shade")
+);
+
+
+$details: (
+	"background": (
+		"default-color": value($main-colors, "primary.shade")
+	),
+	"color": value($main-colors, "primary.contrast")
+);
+
+
+$footer: (
+	"background": value($main-colors, "secondary.normal"),
+	"color": value($main-colors, "primary.normal"),
+	"unsubscribe-emails": (
+		"color": value($main-colors, "primary.contrast"),
+	)
+);
+
+
+

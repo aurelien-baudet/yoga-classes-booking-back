@@ -14,4 +14,6 @@ public class DeploymentContextProperties {
 	private URL webAppBaseUrl;
 	private String bookedClassPath = "classes/${id}";
 	private String unbookPath = "classes/${id}?unbooking=${id}";
+	// TODO: unsubscribe emails url
+	private String unsubscribeEmailsPath = "TODO";
 }

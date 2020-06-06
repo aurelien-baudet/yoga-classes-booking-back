@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/layout.html :: header(~{::title}, ~{})">
+<head th:replace="fragments/layout.html :: head(~{::title}, ~{})">
 	<title>Vous êtes désincrit du cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(bookedClass.start, bookedClass.end)}]]</title>
 </head>
 <body>
-	<h1>Désinscription confirmée</h1>
+	<header th:replace="fragments/layout.html :: header(~{::h1}, ~{}, ~{::.status-icon})">
+		<h1>Désinscription confirmée</h1>
+		<img class="status-icon" th:replace="fragments/components.html :: icon('unbooked.png')" />
+	</header>
 	<div th:replace="fragments/class.html :: bookedClassPreview(${bookedClass}, ${bookedFor}, ${null}, ~{})"></div>
 	<div class="message">
 		<h2>
@@ -16,6 +19,6 @@
 			J'espère vous revoir bientôt sur les tapis, Namaste!
 		</p>
 	</div>
-	<footer th:replace="fragments/layout.html :: footer"></footer>
+	<footer th:replace="fragments/layout.html :: footer(${bookedFor})"></footer>
 </body>
 </html>

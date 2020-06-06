@@ -8,6 +8,7 @@ import java.net.URL;
 import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.reservation.ScheduledClass;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -23,5 +24,9 @@ public class DeploymentContextService {
 	
 	public URL unbookUrl(ScheduledClass scheduledClass) throws MalformedURLException {
 		return new URL(deployment.getWebAppBaseUrl(), evaluate(deployment.getUnbookPath(), scheduledClass));
+	}
+	
+	public URL unsubscribeEmailsUrl(StudentRef student) throws MalformedURLException {
+		return new URL(deployment.getWebAppBaseUrl(), evaluate(deployment.getUnsubscribeEmailsPath(), student));
 	}
 }

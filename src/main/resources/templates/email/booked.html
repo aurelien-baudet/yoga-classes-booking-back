@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/layout.html :: header(~{::title}, ~{::link})">
+<head th:replace="fragments/layout.html :: head(~{::title}, ~{::link})">
 	<title th:if="${approved}">
 		Cours du [[${T(fr.yoga.booking.util.DateRangeUtil).format(bookedClass.start, bookedClass.end)}]] réservé</title>
 	<title th:unless="${approved}">
@@ -8,15 +8,19 @@
 	<link th:href="@{css/booked.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
-	<h1>Je vous remercie de votre inscription</h1>
-	<p th:replace="${approved} ? 
-			~{} :
-			~{fragments/information.html :: waitingMessage}"></p>
+	<header th:replace="fragments/layout.html :: header(~{::h1}, ~{::.waiting-list}, ~{::.status-icon})">
+		<h1>Je vous remercie de votre inscription</h1>
+		<p class="waiting-list" th:replace="${approved} ? 
+				~{} :
+				~{fragments/information.html :: waitingMessage}"></p>
+		<img class="status-icon" th:replace="${approved} ? ~{fragments/components.html :: icon('booking-approved.png')} : ~{}" />
+		<img class="status-icon" th:replace="${approved} ? ~{} : ~{fragments/components.html :: icon('booking-waiting.png')}" />
+	</header>
 	<div th:replace="fragments/class.html :: bookedClassPreview(${bookedClass}, ${bookedFor}, ${bookedClass.lesson.place}, ~{::.actions})">
 		<!-- TODO: list of added participants (handle register friends case) ? -->
 		<div class="actions">
-			<a class="button open" th:href="${@deploymentContextService.viewClassUrl(bookedClass)}">Voir les informations du cours</a>
-			<a class="button unbook" th:href="${@deploymentContextService.unbookUrl(bookedClass)}">Vous désinscrire</a>
+			<a class="open" th:href="${@deploymentContextService.viewClassUrl(bookedClass)}">Voir le cours</a>
+			<a class="unbook" th:href="${@deploymentContextService.unbookUrl(bookedClass)}">Vous désinscrire</a>
 		</div>
 	</div>
 	<div class="message" th:if="${approved}">
@@ -26,6 +30,6 @@
 		<p th:replace="fragments/information.html :: approvedMessage"></p>
 	</div>
 	<div th:replace="fragments/information.html :: description(${bookedClass})"></div>
-	<footer th:replace="fragments/layout.html :: footer"></footer>
+	<footer th:replace="fragments/layout.html :: footer(${bookedFor})"></footer>
 </body>
 </html>

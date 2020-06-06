@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+	<div th:fragment="icon(name)" th:class="|icon ${name.replaceFirst('[.].+', '')}|">
+		<img th:src="@{images/{name}(name=${name})}" />
+	</div>
+</body>
+</html>
