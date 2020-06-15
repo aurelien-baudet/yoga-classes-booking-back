@@ -71,17 +71,21 @@ public class BookingService {
 		if(notBooked(bookedClass, student)) {
 			throw new NotBookedException(bookedClass, student);
 		}
+		boolean wasApproved = bookedClass.isApprovedFor(student);
 		ScheduledClass updatedClass = bookedClass.removeBookingForStudent(student);
 		updatedClass = scheduledClassRepository.save(updatedClass);
 		// notify student
 		notificationService.unbooked(updatedClass, student, canceledBy);
-		if (isFull(bookedClass)) {
-			return updatedClass;
+		// if student was in approved list => handle the free spot
+		// otherwise, nothing more to do
+		if (wasApproved) {
+			// handle waiting list
+			return waitingListStrategy.placeFreed(updatedClass);
 		}
-		// handle waiting list
-		return waitingListStrategy.placeFreed(updatedClass);
+		return updatedClass;
 	}
 	
+
 	@CanListBookedClasses
 	public List<ScheduledClass> listBookedClassesBy(StudentRef student) {
 		return scheduledClassRepository.findNextBookedClassesForStudent(student);
@@ -126,11 +130,6 @@ public class BookingService {
 	}
 
 	
-	private boolean isFull(ScheduledClass scheduledClass) {
-		int maxStudents = scheduledClass.getLesson().getInfo().getMaxStudents();
-		int numBookings = scheduledClass.getBookings().size();
-		return numBookings >= maxStudents;
-	}
 
 	private boolean isApproved(ScheduledClass scheduledClass) {
 		int maxStudents = scheduledClass.getLesson().getInfo().getMaxStudents();

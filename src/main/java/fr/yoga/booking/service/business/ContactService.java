@@ -44,7 +44,7 @@ public class ContactService {
 	}
 
 	private boolean canReceiveEmail(StudentRef student) throws UserException {
-		return getEmail(student) != null;
+		return getEmail(student) != null && !getEmail(student).isBlank();
 	}
 
 	private boolean preferEmail(StudentRef student, Notification notification) {
@@ -53,7 +53,7 @@ public class ContactService {
 	}
 
 	private boolean canReceiveSms(StudentRef student) throws UserException {
-		return getPhoneNumber(student) != null;
+		return getPhoneNumber(student) != null && !getPhoneNumber(student).isBlank();
 	}
 
 	private String toTemplateName(Notification notification) {

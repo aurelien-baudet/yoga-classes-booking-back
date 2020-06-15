@@ -40,7 +40,7 @@ import fr.yoga.booking.service.business.exception.user.UserException;
 @ActiveProfiles("test")
 public class ContactServiceTest {
 	@Mock ScheduledClass bookedClass;
-	@Mock StudentRef unregisteredStudent;
+	@Mock StudentRef student;
 	@Mock Lesson lesson;
 	@Mock LessonInfo lessonInfo;
 	@Mock Teacher teacher;
@@ -63,11 +63,11 @@ public class ContactServiceTest {
 	
 	@BeforeEach
 	public void setup() throws UserException {
-		when(unregisteredStudent.getDisplayName()).thenReturn("Aurélien");
+		when(student.getDisplayName()).thenReturn("Aurélien");
 		when(userService.getContactInfo(any(StudentRef.class))).thenReturn(contact);
 		when(contact.getEmail()).thenReturn(System.getProperty("email.to"));
 		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
-		when(unregisteredStudent.isRegistered()).thenReturn(false);
+		when(student.isRegistered()).thenReturn(false);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
 		when(bookedClass.getEnd()).thenReturn(Instant.now().plus(1, HOURS));
@@ -92,7 +92,7 @@ public class ContactServiceTest {
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void approvedBooking() throws MessagingException, UnreachableUserException, UserException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
-		contactService.sendMessage(unregisteredStudent, new BookedNotification(bookedClass, unregisteredStudent));
+		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class ContactServiceTest {
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void waitingBooking() throws MessagingException, UnreachableUserException, UserException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(false);
-		contactService.sendMessage(unregisteredStudent, new BookedNotification(bookedClass, unregisteredStudent));
+		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class ContactServiceTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void unbooked() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(unregisteredStudent, new UnbookedNotification(bookedClass, unregisteredStudent));
+		contactService.sendMessage(student, new UnbookedNotification(bookedClass, student));
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class ContactServiceTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void classCanceled() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(unregisteredStudent, new ClassCanceledNotification(bookedClass, cancelData));
+		contactService.sendMessage(student, new ClassCanceledNotification(bookedClass, cancelData));
 	}
 
 	/**
@@ -129,7 +129,7 @@ public class ContactServiceTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void placeChanged() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(unregisteredStudent, new PlaceChangedNotification(bookedClass, place, newPlace));
+		contactService.sendMessage(student, new PlaceChangedNotification(bookedClass, place, newPlace));
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class ContactServiceTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void freePlaceBooked() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(unregisteredStudent, new FreePlaceBookedNotification(bookedClass, unregisteredStudent));
+		contactService.sendMessage(student, new FreePlaceBookedNotification(bookedClass, student));
 	}
 
 	/**
@@ -147,6 +147,6 @@ public class ContactServiceTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void reminder() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(unregisteredStudent, new ReminderNotification(bookedClass, unregisteredStudent));
+		contactService.sendMessage(student, new ReminderNotification(bookedClass, student));
 	}
 }
