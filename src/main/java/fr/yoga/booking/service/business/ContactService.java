@@ -8,7 +8,9 @@ import fr.sii.ogham.core.message.Message;
 import fr.sii.ogham.core.service.MessagingService;
 import fr.sii.ogham.email.message.Email;
 import fr.sii.ogham.sms.message.Sms;
+import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.Notification;
+import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
 import fr.yoga.booking.service.business.exception.user.UserException;
@@ -30,27 +32,41 @@ public class ContactService {
 	}
 
 	private Message prepareMessage(StudentRef student, Notification notification) throws UserException {
-		if(canReceiveEmail(student) && preferEmail(student, notification)) {
-			return new Email()
-					.to(getEmail(student))
-					.body().template(toTemplateName(notification), notification);
-		}
-		if(canReceiveSms(student)) {
+		// phone number | email			| notif			|| expected
+		// _			| _				| booked		|| null
+		// _			| _				| cancel		|| null
+		// _			| @				| booked		|| email
+		// _			| @				| cancel		|| email
+		// 06			| _				| booked		|| sms
+		// 06			| _				| cancel		|| sms
+		// 06			| @				| booked		|| email
+		// 06			| @				| cancel		|| sms
+		if (canReceiveSmsOnly(student) || (canReceiveSms(student) && preferSms(student, notification))) {
 			return new Sms()
-					.to(getPhoneNumber(student))
-					.message().template(toTemplateName(notification), notification);
+				.to(getPhoneNumber(student))
+				.message().template(toTemplateName(notification), notification);
+		}
+		if (canReceiveEmail(student)) {
+			return new Email()
+				.to(getEmail(student))
+				.body().template(toTemplateName(notification), notification);
 		}
 		return null;
+	}
+
+	private boolean canReceiveSmsOnly(StudentRef student) throws UserException {
+		return canReceiveSms(student) && !canReceiveEmail(student);
 	}
 
 	private boolean canReceiveEmail(StudentRef student) throws UserException {
 		return getEmail(student) != null && !getEmail(student).isBlank();
 	}
 
-	private boolean preferEmail(StudentRef student, Notification notification) {
-		// TODO: handle means of communication preferences (prefer email or sms for particular user/notification) ?
-		return true;
+	private boolean preferSms(StudentRef student, Notification notification) {
+		return notification instanceof PlaceChangedNotification 
+				|| notification instanceof ClassCanceledNotification;
 	}
+
 
 	private boolean canReceiveSms(StudentRef student) throws UserException {
 		return getPhoneNumber(student) != null && !getPhoneNumber(student).isBlank();
