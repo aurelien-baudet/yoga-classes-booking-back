@@ -2,21 +2,24 @@
 <#macro approvedMessage>
 	<@utils.indent>
     Vous avez réservé un cours de yoga avec moi et je vous en remercie.
-    Prévoyez de venir 15min en avance pour vous installer calmement.
-
-    Je limite les places afin d'être au maximum avec vous, pour vous accompagner et vous emmener toujours un peu plus loin.
-    Essayez de venir le ventre léger pour ne pas bloquer la respiration.
-
-    Si vous ne vous sentez pas en grande forme avant le cours, venez ;)
-    C'est là que le yoga prend tout son sens.
-    Vous vous sentirez probablement mieux que si vous n'étiez pas venu.
-
-    Si jamais vous avez un empêchement, pensez à annuler la reservation afin que quelqu'un puisse prendre votre place.
-    Plus vous prévenez tôt, mieux c'est pour les autres :)
-
-    La participation est libre, cependant on peut convenir d'un forfait mensuel ensemble afin que vous puissiez venir en illimité sur un mois.
-
-    A bientôt sur le tapis, Namaste!
+	Prévoyez de venir 15min en avance pour vous garer calmement, éviter de vous garer devant le portail des voisins, que le portail soit un portail pour voiture ou non, cela arrive fréquemment et c’est un aspect très sensible dans cette rue, donc dans la mesure du possible et pour faciliter les bonnes relations avec le voisinage, éloignez vous de la rue Saint Expédit pour garer votre voiture. 
+	 
+	
+	Je limite les places afin d'être au maximum avec vous, pour vous accompagner et vous emmener toujours un peu plus loin.
+	Essayez de venir le ventre léger pour ne pas bloquer la respiration.
+	
+	Si vous ne vous sentez pas en grande forme avant le cours, venez 😉
+	C'est là que le yoga prend tout son sens.
+	Vous vous sentirez probablement mieux que si vous n'étiez pas venu.
+	
+	Si jamais vous avez un empêchement, pensez à annuler la réservation afin que quelqu'un puisse prendre votre place.
+	Plus vous prévenez tôt, mieux c'est pour les autres 🙂
+	
+	Tarifs : 12 euros le cours d’essais, 15 euros le cours de passage.
+	Abonnement à l’association : 10 euros par an. 
+	Tarifs abonnés : 50 euros la carte 5 cours, 70 euros en illimité sur un mois glissant. 
+	
+	A bientôt sur le tapis, Namaste!
     </@>
 </#macro>
 
