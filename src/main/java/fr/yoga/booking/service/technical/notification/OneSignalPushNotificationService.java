@@ -47,14 +47,19 @@ public class OneSignalPushNotificationService implements PushNotificationService
 	
 	@Override
 	public void sendPushNotification(User user, String token, Notification notification) throws NotificationException {
-		NotificationRequestBuilder builder = aNotificationRequest()
-				.withAppId(oneSignalConfig.getAppId())
-				.withIncludePlayerId(token);
-		OneSignalNotificationConverter converter = onesignalConverters.get(notification.getType());
-		if (converter == null) {
-			log.info("No converter for push notification {}", notification.getType());
-			return;
+		try {
+			NotificationRequestBuilder builder = aNotificationRequest()
+					.withAppId(oneSignalConfig.getAppId())
+					.withIncludePlayerId(token);
+			OneSignalNotificationConverter converter = onesignalConverters.get(notification.getType());
+			if (converter == null) {
+				log.info("No converter for push notification {}", notification.getType());
+				return;
+			}
+			OneSignal.createNotification(oneSignalConfig.getApiKey(), converter.toNotificationRequest(notification, builder));
+		} catch (Exception e) {
+			log.error("Failed to send push notification to '{}' ({})", user.getDisplayName(), token, e);
+			throw new NotificationException("Failed to send push notification to '"+user.getDisplayName()+"' ("+token+")", e);
 		}
-		OneSignal.createNotification(oneSignalConfig.getApiKey(), converter.toNotificationRequest(notification, builder));
 	}
 }

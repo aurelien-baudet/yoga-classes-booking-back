@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NotificationService {
 	private final PushNotificationTokenRepository pushNotificationTokenRepository;
 	private final UserService userService;
-	private final PushNotificationService fcmService;
+	private final PushNotificationService pushService;
 	private final ContactService contactService;
 	
 	@CanRegisterNotificationToken
@@ -104,6 +104,9 @@ public class NotificationService {
 			log.warn("User {} is unreachable (neither phone number nor email provided)", student.getDisplayName());
 			log.trace("{}", e.getMessage(), e);
 			// TODO: handle correctly errors
+		} catch (Exception e) {
+			log.error("Failed to notify {} due to unexpected error", student.getDisplayName(), e);
+			// TODO: handle correctly errors
 		}
 	}
 
@@ -120,7 +123,7 @@ public class NotificationService {
 	private void sendPushNotification(StudentRef student, Notification data) throws NotificationException, UserException {
 		UserPushToken mapping = pushNotificationTokenRepository.findFirstByUserIdOrderByRegistrationDateDesc(student.getId());
 		if(mapping != null) {
-			fcmService.sendPushNotification(userService.getUser(student.getId()), mapping.getToken(), data);
+			pushService.sendPushNotification(userService.getUser(student.getId()), mapping.getToken(), data);
 		}
 	}
 
