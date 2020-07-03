@@ -1,11 +1,16 @@
 package fr.yoga.booking.it;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -14,9 +19,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.EnabledIf;
+
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 import fr.sii.ogham.core.exception.MessagingException;
+import fr.sii.ogham.testing.assertion.OghamAssertions;
+import fr.sii.ogham.testing.extension.junit.SmppServerRule;
+import fr.sii.ogham.testing.extension.junit.sms.config.ServerConfig;
+import fr.sii.ogham.testing.sms.simulator.bean.SubmitSm;
+import fr.sii.ogham.testing.sms.simulator.jsmpp.JSMPPServer;
+import fr.sii.ogham.testing.sms.simulator.jsmpp.SubmitSmAdapter;
 import fr.yoga.booking.domain.account.ContactInfo;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.notification.BookedNotification;
@@ -36,7 +49,15 @@ import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
 import fr.yoga.booking.service.business.exception.user.UserException;
 
-@SpringBootTest(properties = "async.enabled=false")
+@SpringBootTest(properties = {
+	"async.enabled=false",
+	"mail.smtp.host=127.0.0.1",
+	"mail.smtp.port=3025",
+	"ogham.email.from.default-value=bar@yopmail.com",
+	"ogham.sms.smpp.host=127.0.0.1",
+	"ogham.sms.smpp.port="+SmppServerRule.DEFAULT_PORT,
+	"ogham.sms.from.default-value=0700000000"
+})
 @ActiveProfiles("test")
 public class ContactServiceTest {
 	@Mock ScheduledClass bookedClass;
@@ -61,12 +82,19 @@ public class ContactServiceTest {
 			"Participation libre. \n" + 
 			"Place limitées , me contactez en MP.";
 	
+	GreenMail greenMail;
+	JSMPPServer smppServer;
+	
 	@BeforeEach
-	public void setup() throws UserException {
+	public void setup() throws Exception {
+		greenMail = new GreenMail(ServerSetupTest.SMTP);
+		greenMail.start();
+		smppServer = new JSMPPServer(SmppServerRule.DEFAULT_PORT, new ServerConfig().build());
+		smppServer.start();
+		
 		when(student.getDisplayName()).thenReturn("Aurélien");
 		when(userService.getContactInfo(any(StudentRef.class))).thenReturn(contact);
-		when(contact.getEmail()).thenReturn(System.getProperty("email.to"));
-		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
+//		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
 		when(student.isRegistered()).thenReturn(false);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
@@ -84,69 +112,152 @@ public class ContactServiceTest {
 		when(newPlace.getAddress()).thenReturn("128 rue Amiral Lacaze, Saint Pierre");
 		when(cancelData.getMessage()).thenReturn("Cours annulé en raison de la pluie...\nEt j'ai la flemme");
 	}
-
-	/**
-	 * Not a real test. Just use it to send an email or SMS
-	 */
-	@Test
-	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void approvedBooking() throws MessagingException, UnreachableUserException, UserException {
-		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
-		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
+	
+	@AfterEach
+	public void cleanup() {
+		try {
+			smppServer.stop();
+		} catch(Exception e) {
+			// ignore
+		}
+		greenMail.stop();
 	}
 
-	/**
-	 * Not a real test. Just use it to send an email or SMS
-	 */
 	@Test
-	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void waitingBooking() throws MessagingException, UnreachableUserException, UserException {
-		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(false);
+	public void emailForApprovedBooking() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
+
 		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
+		
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
+	}
+
+	@Test
+	public void emailForWaitingBooking() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(false);
+		
+		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
 	}
 	
-	/**
-	 * Not a real test. Just use it to send an email or SMS
-	 */
 	@Test
-	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void unbooked() throws MessagingException, UnreachableUserException, UserException {
+	public void emailForUnbooked() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+		
 		contactService.sendMessage(student, new UnbookedNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
 	}
 
-	/**
-	 * Not a real test. Just use it to send an email or SMS
-	 */
 	@Test
-	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void classCanceled() throws MessagingException, UnreachableUserException, UserException {
+	public void emailForClassCanceled() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
 		contactService.sendMessage(student, new ClassCanceledNotification(bookedClass, cancelData));
+
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
 	}
 
-	/**
-	 * Not a real test. Just use it to send an email or SMS
-	 */
 	@Test
-	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void placeChanged() throws MessagingException, UnreachableUserException, UserException {
+	public void emailForPlaceChanged() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
 		contactService.sendMessage(student, new PlaceChangedNotification(bookedClass, place, newPlace));
+
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
 	}
 
-	/**
-	 * Not a real test. Just use it to send an email or SMS
-	 */
 	@Test
-	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void freePlaceBooked() throws MessagingException, UnreachableUserException, UserException {
+	public void emailForFreePlaceBooked() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
 		contactService.sendMessage(student, new FreePlaceBookedNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
 	}
 
-	/**
-	 * Not a real test. Just use it to send an email or SMS
-	 */
 	@Test
-	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
-	public void reminder() throws MessagingException, UnreachableUserException, UserException {
+	public void emailForReminder() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
 		contactService.sendMessage(student, new ReminderNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
+	}
+
+
+
+	@Test
+	public void smsForApprovedBooking() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
+
+		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
+		
+		OghamAssertions.assertThat(getReceivedSms()).count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForWaitingBooking() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(false);
+		
+		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(getReceivedSms()).count(greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void smsForUnbooked() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+		
+		contactService.sendMessage(student, new UnbookedNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(getReceivedSms()).count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForClassCanceled() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new ClassCanceledNotification(bookedClass, cancelData));
+
+		OghamAssertions.assertThat(getReceivedSms()).count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForPlaceChanged() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new PlaceChangedNotification(bookedClass, place, newPlace));
+
+		OghamAssertions.assertThat(getReceivedSms()).count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForFreePlaceBooked() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new FreePlaceBookedNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(getReceivedSms()).count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForReminder() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new ReminderNotification(bookedClass, student));
+
+		OghamAssertions.assertThat(getReceivedSms()).count(greaterThanOrEqualTo(1));
+	}
+
+	private List<SubmitSm> getReceivedSms() {
+		return smppServer.getReceivedMessages().stream()
+				.map(SubmitSmAdapter::new)
+				.collect(toList());
 	}
 }

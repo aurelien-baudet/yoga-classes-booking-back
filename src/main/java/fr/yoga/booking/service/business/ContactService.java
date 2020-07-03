@@ -32,15 +32,6 @@ public class ContactService {
 	}
 
 	private Message prepareMessage(StudentRef student, Notification notification) throws UserException {
-		// phone number | email			| notif			|| expected
-		// _			| _				| booked		|| null
-		// _			| _				| cancel		|| null
-		// _			| @				| booked		|| email
-		// _			| @				| cancel		|| email
-		// 06			| _				| booked		|| sms
-		// 06			| _				| cancel		|| sms
-		// 06			| @				| booked		|| email
-		// 06			| @				| cancel		|| sms
 		if (canReceiveSmsOnly(student) || (canReceiveSms(student) && preferSms(student, notification))) {
 			return new Sms()
 				.to(getPhoneNumber(student))
