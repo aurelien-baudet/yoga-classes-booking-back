@@ -1,6 +1,6 @@
 cors:
   allowed-methods: GET,POST,OPTIONS,PATCH,PUT,DELETE
-  allowed-headers: Access-Control-Allow-Origin,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With
+  allowed-headers: Access-Control-Allow-Origin,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With,Accept,Accept-Language
 
 reminder:
   next-class: "1h"
