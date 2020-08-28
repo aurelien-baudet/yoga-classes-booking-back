@@ -1,0 +1,11 @@
+@import "variables";
+@import "icons-utils";
+@import "button-utils";
+
+.summary {
+	.actions {
+		a.confirm {
+			@include button(value($buttons, "primary"));
+		}
+	}
+}

@@ -1,0 +1,2 @@
+Bonjour ${student.displayName}, une place est libre au cours du ${statics['fr.yoga.booking.util.DateRangeUtil'].format(bookedClass.start, bookedClass.end)}.
+Prenez la place disponible via le site ou l'application.

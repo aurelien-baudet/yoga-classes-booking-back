@@ -236,4 +236,9 @@ public class AccessControlService {
 	public boolean canChangePasswordForStudent(User currentUser, Student student) {
 		return hasAnyRole(currentUser, GOD);
 	}
+
+	public boolean canTakeAvailablePlace(User currentUser, ScheduledClass bookedClass, StudentRef student, User bookedBy) {
+		// anyone is allowed to take a place to a class if he has already booked it
+		return bookedClass.allStudents().stream().anyMatch(s -> s.isSame(student));
+	}
 }

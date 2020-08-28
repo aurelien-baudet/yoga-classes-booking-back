@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -81,5 +82,13 @@ public class BookingController {
 	public List<ScheduledClassDto> listBookedClassesForUnregisteredUser(@RequestParam("id") String id) throws UserException {
 		UnregisteredUser student = new UnregisteredUser(id);
 		return classMapper.toDto(bookingService.listBookedClassesBy(student));
+	}
+
+	@PatchMapping(value="{classId}/bookings", params="confirm")
+	public ScheduledClassDto confirm(@PathVariable("classId") String classId, @RequestBody StudentRef student) throws UserException, ScheduledClassException, BookingException {
+		// TODO: handle case where a connected user books for another unregistered user
+//		User bookedBy = userService.getUser(currentUser != null ? currentUser.getUser().getId() : studentId);
+		ScheduledClass bookedClass = classService.getClass(classId);
+		return classMapper.toDto(bookingService.confirm(bookedClass, student, null));
 	}
 }

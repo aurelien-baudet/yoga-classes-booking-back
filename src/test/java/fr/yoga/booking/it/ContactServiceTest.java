@@ -29,6 +29,7 @@ import fr.sii.ogham.testing.extension.spring.JsmppServerInitializer;
 import fr.yoga.booking.domain.account.ContactInfo;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
+import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
@@ -163,6 +164,15 @@ public class ContactServiceTest {
 	}
 
 	@Test
+	public void emailForAvailablePlace() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
+		contactService.sendMessage(student, new AvailablePlaceNotification(bookedClass, studentRef));
+
+		OghamAssertions.assertThat(greenMail.getReceivedMessages()).count(is(1));
+	}
+
+	@Test
 	public void emailForReminder() throws MessagingException, UnreachableUserException, UserException {
 		when(contact.getEmail()).thenReturn("foo@yopmail.com");
 
@@ -225,6 +235,15 @@ public class ContactServiceTest {
 		when(contact.getPhoneNumber()).thenReturn("0600000000");
 
 		contactService.sendMessage(student, new FreePlaceBookedNotification(bookedClass, studentRef));
+
+		OghamAssertions.assertThat(smppServer).receivedMessages().count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForAvailablePlace() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new AvailablePlaceNotification(bookedClass, studentRef));
 
 		OghamAssertions.assertThat(smppServer).receivedMessages().count(greaterThanOrEqualTo(1));
 	}

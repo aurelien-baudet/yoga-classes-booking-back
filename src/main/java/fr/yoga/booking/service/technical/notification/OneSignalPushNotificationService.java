@@ -3,10 +3,12 @@ package fr.yoga.booking.service.technical.notification;
 import static com.currencyfair.onesignal.model.notification.NotificationRequestBuilder.aNotificationRequest;
 import static fr.yoga.booking.domain.notification.NotificationType.CANCELED;
 import static fr.yoga.booking.domain.notification.NotificationType.FREE_PLACE_AUTOMATICALLY_BOOKED;
+import static fr.yoga.booking.domain.notification.NotificationType.AVAILABLE_PLACE;
 import static fr.yoga.booking.domain.notification.NotificationType.PLACE_CHANGED;
 import static fr.yoga.booking.domain.notification.NotificationType.REMINDER;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.classCanceledConverter;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.freePlaceAutomaticallyBookedConverter;
+import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.availablePlaceConverter;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.placeChangedConverter;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.reminderConverter;
 
@@ -39,6 +41,7 @@ public class OneSignalPushNotificationService implements PushNotificationService
 //		oneSignalTags.put(BOOKED, placeChangedConverter());
 //		oneSignalTags.put(UNBOOKED, placeChangedConverter());
 		onesignalConverters.put(FREE_PLACE_AUTOMATICALLY_BOOKED, freePlaceAutomaticallyBookedConverter());
+		onesignalConverters.put(AVAILABLE_PLACE, availablePlaceConverter());
 		onesignalConverters.put(PLACE_CHANGED, placeChangedConverter());
 		onesignalConverters.put(REMINDER, reminderConverter());
 		onesignalConverters.put(CANCELED, classCanceledConverter());

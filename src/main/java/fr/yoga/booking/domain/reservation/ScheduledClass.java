@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import fr.yoga.booking.domain.reservation.Booking.SortByAscendingDateComparator;
@@ -81,5 +82,35 @@ public class ScheduledClass {
 				.stream()
 				.filter(b -> b.isForStudent(student))
 				.anyMatch(b -> b.isApproved());
+	}
+	
+	public boolean isWaitingFor(StudentRef student) {
+		return getBookings()
+				.stream()
+				.filter(b -> b.isForStudent(student))
+				.anyMatch(b -> !b.isApproved());
+	}
+	
+	public List<StudentRef> approvedStudents() {
+		return sortedByAscendingDateBookings()
+				.stream()
+				.filter(c -> c.isApproved())
+				.map(Booking::getStudent)
+				.collect(toList());
+	}
+	
+	public List<StudentRef> waitingStudents() {
+		return sortedByAscendingDateBookings()
+				.stream()
+				.filter(c -> !c.isApproved())
+				.map(Booking::getStudent)
+				.collect(toList());
+	}
+	
+	@Transient
+	public boolean isApprovedListFull() {
+		int maxStudents = getLesson().getInfo().getMaxStudents();
+		int numBookings = approvedStudents().size();
+		return numBookings >= maxStudents;
 	}
 }

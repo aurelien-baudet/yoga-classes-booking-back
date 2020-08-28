@@ -6,11 +6,12 @@ import org.springframework.stereotype.Service;
 
 import fr.sii.ogham.core.exception.MessagingException;
 import fr.yoga.booking.domain.account.User;
+import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
-import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.Notification;
+import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
 import fr.yoga.booking.domain.notification.UnbookedNotification;
 import fr.yoga.booking.domain.notification.UserPushToken;
@@ -86,17 +87,35 @@ public class NotificationService {
 		}
 	}
 
+	public void availablePlace(ScheduledClass scheduledClass, List<StudentRef> waitingStudents) {
+		log.info("[{}] place available => notify students that are waiting", scheduledClass.getId());
+		for(StudentRef student : waitingStudents) {
+			notify(student, new AvailablePlaceNotification(scheduledClass, student));
+		}
+	}
+
 	private void notify(StudentRef student, Notification notification) {
+		if(canReceivePushNotification(student)) {
+			tryPushAndFallbackToEmailOrSms(student, notification);
+		}
+		if(!canReceivePushNotification(student) || shouldAlsoReceiveUsingOtherMeansOfCommunication(student, notification)) {
+			tryEmailOrSms(student, notification);
+		}
+	}
+
+	private void tryPushAndFallbackToEmailOrSms(StudentRef student, Notification notification) {
 		try {
-			if(canReceivePushNotification(student)) {
-				sendPushNotification(student, notification);
-			}
-			if(!canReceivePushNotification(student) || shouldAlsoReceiveUsingOtherMeansOfCommunication(student, notification)) {
-				contactService.sendMessage(userService.getRegisteredStudent(student.getId()), notification);
-			}
+			sendPushNotification(student, notification);
 		} catch(NotificationException | UserException e) {
 			log.error("Failed to send push notification to {}", student.getDisplayName(), e);
 			// TODO: handle correctly errors
+			tryEmailOrSms(student, notification);
+		}
+	}
+
+	private void tryEmailOrSms(StudentRef student, Notification notification) {
+		try {
+			contactService.sendMessage(userService.getRegisteredStudent(student.getId()), notification);
 		} catch (MessagingException e) {
 			log.error("Failed to send email/sms to {}", student.getDisplayName(), e);
 			// TODO: handle correctly errors

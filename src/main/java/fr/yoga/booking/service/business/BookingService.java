@@ -32,6 +32,7 @@ public class BookingService {
 	private final ScheduledClassRepository scheduledClassRepository;
 	private final NotificationService notificationService;
 	private final WaitingListStrategy waitingListStrategy;
+	private final ConfirmBookingStrategy confirmStrategy;
 	
 	@CanBookClass
 	public ScheduledClass book(ScheduledClass bookedClass, Student student, User bookedBy) throws BookingException {
@@ -48,7 +49,7 @@ public class BookingService {
 		if(alreadyBooked(bookedClass, student)) {
 			throw new AlreadyBookedException(bookedClass, student);
 		}
-		ScheduledClass updatedClass = bookedClass.addBooking(new Booking(Instant.now(), bookedBy, student, isApproved(bookedClass)));
+		ScheduledClass updatedClass = bookedClass.addBooking(new Booking(Instant.now(), bookedBy, student, isAutomaticallyApproved(bookedClass)));
 		updatedClass = scheduledClassRepository.save(updatedClass);
 		// notify student
 		notificationService.booked(updatedClass, student, bookedBy);
@@ -116,6 +117,10 @@ public class BookingService {
 				.filter(c -> !c.isApproved())
 				.collect(toList());
 	}
+
+	public ScheduledClass confirm(ScheduledClass bookedClass, StudentRef student, User bookedBy) throws BookingException {
+		return confirmStrategy.confirm(bookedClass, student, bookedBy);
+	}
 	
 	public void remindStudentsAboutNextClass(Reminder reminder) throws RemindBookingException {
 		ScheduledClass nextClass = scheduledClassRepository.findById(reminder.getScheduledClassId()).orElse(null);
@@ -129,12 +134,9 @@ public class BookingService {
 		notificationService.reminder(nextClass, approvedStudents);
 	}
 
-	
 
-	private boolean isApproved(ScheduledClass scheduledClass) {
-		int maxStudents = scheduledClass.getLesson().getInfo().getMaxStudents();
-		int numBookings = scheduledClass.getBookings().size();
-		return numBookings < maxStudents;
+	private boolean isAutomaticallyApproved(ScheduledClass scheduledClass) {
+		return !scheduledClass.isApprovedListFull();
 	}
 
 	private boolean alreadyBooked(ScheduledClass bookedClass, StudentRef student) {

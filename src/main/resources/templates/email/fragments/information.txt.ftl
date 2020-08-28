@@ -28,7 +28,7 @@
     Vous avez réservé un cours de yoga avec moi et je vous en remercie.
     Le cours étant complet, vous êtes inscrit sur la file d'attente.
     
-    Dès qu'une place se libère, vous recevez un mail pour vous indiquer que vous êtes automatiquement inscrit.
+    Dès qu'une place se libère, vous recevez un mail pour vous vous demander de confirmer votre présence.
     
     A bientôt sur le tapis, Namaste!
     </@>

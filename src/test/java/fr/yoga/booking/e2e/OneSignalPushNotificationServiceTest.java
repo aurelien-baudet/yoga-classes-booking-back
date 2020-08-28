@@ -26,6 +26,7 @@ import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
+import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
 import fr.yoga.booking.domain.reservation.CancelData;
@@ -119,9 +120,16 @@ public class OneSignalPushNotificationServiceTest {
 
 	@Test
 	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
-	public void freePlace() throws MessagingException, UnreachableUserException, NotificationException {
+	public void freePlaceBooked() throws MessagingException, UnreachableUserException, NotificationException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
 		onesignalService.sendPushNotification(user, token, new FreePlaceBookedNotification(bookedClass, studentRef));
+	}
+
+	@Test
+	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
+	public void availablePlace() throws MessagingException, UnreachableUserException, NotificationException {
+		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
+		onesignalService.sendPushNotification(user, token, new AvailablePlaceNotification(bookedClass, studentRef));
 	}
 
 	@Test

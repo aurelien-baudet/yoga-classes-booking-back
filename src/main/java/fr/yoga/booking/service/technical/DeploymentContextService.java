@@ -26,6 +26,10 @@ public class DeploymentContextService {
 		return new URL(deployment.getWebAppBaseUrl(), evaluate(deployment.getUnbookPath(), scheduledClass));
 	}
 	
+	public URL takeAvailablePlaceUrl(ScheduledClass scheduledClass) throws MalformedURLException {
+		return new URL(deployment.getWebAppBaseUrl(), evaluate(deployment.getTakeAvailablePlacePath(), scheduledClass));
+	}
+	
 	public URL unsubscribeEmailsUrl(StudentRef student) throws MalformedURLException {
 		return new URL(deployment.getWebAppBaseUrl(), evaluate(deployment.getUnsubscribeEmailsPath(), student));
 	}

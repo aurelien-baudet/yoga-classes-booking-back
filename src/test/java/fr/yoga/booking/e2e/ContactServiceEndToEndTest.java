@@ -23,6 +23,7 @@ import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
+import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
 import fr.yoga.booking.domain.notification.UnbookedNotification;
@@ -143,6 +144,15 @@ public class ContactServiceEndToEndTest {
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void freePlaceBooked() throws MessagingException, UnreachableUserException, UserException {
 		contactService.sendMessage(student, new FreePlaceBookedNotification(bookedClass, studentRef));
+	}
+
+	/**
+	 * Not a real test. Just use it to send an email or SMS
+	 */
+	@Test
+	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
+	public void availablePlace() throws MessagingException, UnreachableUserException, UserException {
+		contactService.sendMessage(student, new AvailablePlaceNotification(bookedClass, studentRef));
 	}
 
 	/**

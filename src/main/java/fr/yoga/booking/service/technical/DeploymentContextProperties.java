@@ -14,6 +14,7 @@ public class DeploymentContextProperties {
 	private URL webAppBaseUrl;
 	private String bookedClassPath = "classes/${id}";
 	private String unbookPath = "classes/${id}?unbooking=${id}";
+	private String takeAvailablePlacePath = "classes/${id}?confirm=${id}";
 	// TODO: unsubscribe emails url
 	private String unsubscribeEmailsPath = "TODO";
 	private String resetPasswordPath = "users/password/reset?code=${token}";
