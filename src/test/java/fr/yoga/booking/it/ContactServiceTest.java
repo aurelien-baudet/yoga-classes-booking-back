@@ -25,7 +25,6 @@ import com.icegreen.greenmail.util.ServerSetupTest;
 
 import fr.sii.ogham.core.exception.MessagingException;
 import fr.sii.ogham.testing.assertion.OghamAssertions;
-import fr.sii.ogham.testing.extension.junit.SmppServerRule;
 import fr.sii.ogham.testing.extension.junit.sms.config.ServerConfig;
 import fr.sii.ogham.testing.sms.simulator.bean.SubmitSm;
 import fr.sii.ogham.testing.sms.simulator.jsmpp.JSMPPServer;
@@ -55,7 +54,7 @@ import fr.yoga.booking.service.business.exception.user.UserException;
 	"mail.smtp.port=3025",
 	"ogham.email.from.default-value=bar@yopmail.com",
 	"ogham.sms.smpp.host=127.0.0.1",
-	"ogham.sms.smpp.port="+SmppServerRule.DEFAULT_PORT,
+	"ogham.sms.smpp.port=42775",
 	"ogham.sms.from.default-value=0700000000"
 })
 @ActiveProfiles("test")
@@ -89,7 +88,7 @@ public class ContactServiceTest {
 	public void setup() throws Exception {
 		greenMail = new GreenMail(ServerSetupTest.SMTP);
 		greenMail.start();
-		smppServer = new JSMPPServer(SmppServerRule.DEFAULT_PORT, new ServerConfig().build());
+		smppServer = new JSMPPServer(new ServerConfig().port(42775).build());
 		smppServer.start();
 		
 		when(student.getDisplayName()).thenReturn("Aurélien");
