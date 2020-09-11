@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PasswordService {
 	private final PasswordEncoder passwordEncoder;
-	
+
 	public String encodePassword(String password) {
 		return passwordEncoder.encode(password);
 	}
@@ -18,5 +18,4 @@ public class PasswordService {
 	public Credentials encodePassword(Credentials credentials) {
 		return new Credentials(credentials.getLogin(), encodePassword(credentials.getPassword()));
 	}
-
 }

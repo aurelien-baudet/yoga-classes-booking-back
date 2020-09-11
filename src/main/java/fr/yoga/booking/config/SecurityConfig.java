@@ -70,6 +70,8 @@ public class SecurityConfig {
 					.antMatchers(POST, "/users/unregistered").permitAll()
 					.antMatchers(GET, "/users/*/preferences").permitAll()
 					.antMatchers(GET, "/users/unregistered/*/preferences").permitAll()
+					.antMatchers(GET, "/users/password").permitAll()
+					.antMatchers(POST, "/users/password").permitAll()
 					.antMatchers(GET, "/classes").permitAll()
 					.antMatchers(GET, "/classes/*").permitAll()
 					.antMatchers(GET, "/places").permitAll()

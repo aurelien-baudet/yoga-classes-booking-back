@@ -1,7 +1,7 @@
-package fr.yoga.booking.it;
+package fr.yoga.booking.e2e;
 
 import static java.time.temporal.ChronoUnit.HOURS;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
@@ -21,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.EnabledIf;
 
 import fr.sii.ogham.core.exception.MessagingException;
 import fr.yoga.booking.domain.account.ContactInfo;
+import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
@@ -46,7 +47,8 @@ import fr.yoga.booking.service.technical.notification.OneSignalPushNotificationS
 public class OneSignalPushNotificationServiceTest {
 	@Mock ScheduledClass bookedClass;
 	@Mock User user;
-	@Mock StudentRef unregisteredStudent;
+	@Mock StudentRef studentRef;
+	@Mock Student student;
 	@Mock Lesson lesson;
 	@Mock LessonInfo lessonInfo;
 	@Mock Teacher teacher;
@@ -71,12 +73,13 @@ public class OneSignalPushNotificationServiceTest {
 	
 	@BeforeEach
 	public void setup() throws MalformedURLException, PlaceException, UserException {
+		when(userService.getRegisteredStudent(anyString())).thenReturn(student);
+		when(student.getContact()).thenReturn(contact);
 		when(user.getDisplayName()).thenReturn("Aurélien");
-		when(unregisteredStudent.getDisplayName()).thenReturn("Aurélien");
-		when(userService.getContactInfo(any(StudentRef.class))).thenReturn(contact);
+		when(studentRef.getDisplayName()).thenReturn("Aurélien");
 		when(contact.getEmail()).thenReturn(System.getProperty("email.to"));
 		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
-		when(unregisteredStudent.isRegistered()).thenReturn(false);
+		when(studentRef.isRegistered()).thenReturn(true);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
 		when(bookedClass.getEnd()).thenReturn(Instant.now().plus(1, HOURS));
@@ -118,13 +121,13 @@ public class OneSignalPushNotificationServiceTest {
 	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
 	public void freePlace() throws MessagingException, UnreachableUserException, NotificationException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
-		onesignalService.sendPushNotification(user, token, new FreePlaceBookedNotification(bookedClass, unregisteredStudent));
+		onesignalService.sendPushNotification(user, token, new FreePlaceBookedNotification(bookedClass, studentRef));
 	}
 
 	@Test
 	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
 	public void reminder() throws MessagingException, UnreachableUserException, NotificationException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
-		onesignalService.sendPushNotification(user, token, new ReminderNotification(bookedClass, unregisteredStudent));
+		onesignalService.sendPushNotification(user, token, new ReminderNotification(bookedClass, studentRef));
 	}
 }

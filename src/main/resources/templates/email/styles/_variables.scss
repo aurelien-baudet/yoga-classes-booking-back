@@ -158,5 +158,21 @@ $footer: (
 	)
 );
 
-
+$reset-password: (
+	"header": (
+		"padding": 0 0 40px 0
+	),
+	"code": (
+		"color": value($main-colors, "primary.contrast"),
+		"font-size": 14px,
+		"margin": 10px 0 30px 0
+	),
+	"reset-button": (
+		"margin": 10px auto 40px auto
+	),
+	"validity": (
+		"margin": 40px auto,
+		"font-size": 10px,
+	)
+)
 

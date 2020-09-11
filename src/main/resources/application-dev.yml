@@ -3,6 +3,8 @@ cors:
 
 reminder:
   next-class: "4h"
+password-reset:
+  token-validity: "2m"
 
 mail:
   smtp:

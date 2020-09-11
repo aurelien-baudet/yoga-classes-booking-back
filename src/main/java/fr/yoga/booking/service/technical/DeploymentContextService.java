@@ -29,4 +29,13 @@ public class DeploymentContextService {
 	public URL unsubscribeEmailsUrl(StudentRef student) throws MalformedURLException {
 		return new URL(deployment.getWebAppBaseUrl(), evaluate(deployment.getUnsubscribeEmailsPath(), student));
 	}
+	
+	public URL resetPasswordUrl(String token) throws MalformedURLException {
+		return new URL(deployment.getWebAppBaseUrl(), evaluate(deployment.getResetPasswordPath(), new TokenWrapper(token)));
+	}
+
+	@Data
+	public static class TokenWrapper {
+		private final String token;
+	}
 }

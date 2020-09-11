@@ -9,6 +9,8 @@ import fr.yoga.booking.controller.dto.ErrorDto;
 import fr.yoga.booking.service.business.exception.AlreadyRegisteredUser;
 import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedException;
 import fr.yoga.booking.service.business.exception.reservation.NotBookedException;
+import fr.yoga.booking.service.business.exception.user.ExpiredResetTokenException;
+import fr.yoga.booking.service.business.exception.user.InvalidResetTokenException;
 import fr.yoga.booking.service.business.exception.user.StudentNotFoundException;
 
 @RestControllerAdvice
@@ -41,5 +43,17 @@ public class BusinessErrorExceptionTranslator {
 		return new ErrorDto("NOT_BOOKED", e)
 				.addData("classId", e.getBookedClass().getId())
 				.addData("studentId", e.getStudent().getId());
+	}
+	
+	@ExceptionHandler(InvalidResetTokenException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorDto invalid(InvalidResetTokenException e) {
+		return new ErrorDto("INVALID_TOKEN", e);
+	}
+	
+	@ExceptionHandler(ExpiredResetTokenException.class)
+	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+	public ErrorDto expired(ExpiredResetTokenException e) {
+		return new ErrorDto("EXPIRED_TOKEN", e);
 	}
 }

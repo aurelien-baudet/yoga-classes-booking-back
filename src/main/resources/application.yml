@@ -4,6 +4,9 @@ cors:
 
 reminder:
   next-class: "1h"
+password-reset:
+  token-validity: "30m"
+  token-length: 8
 
 ogham:
   email:
@@ -15,7 +18,6 @@ ogham:
       classpath:
         path-prefix: /templates/sms/
         path-suffix: .txt.ftl
-      
   
 logging:
   level:

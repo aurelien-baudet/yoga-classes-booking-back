@@ -1,7 +1,7 @@
-package fr.yoga.booking.it;
+package fr.yoga.booking.e2e;
 
 import static java.time.temporal.ChronoUnit.HOURS;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -18,6 +18,7 @@ import org.springframework.test.context.junit.jupiter.EnabledIf;
 
 import fr.sii.ogham.core.exception.MessagingException;
 import fr.yoga.booking.domain.account.ContactInfo;
+import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
@@ -36,11 +37,12 @@ import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
 import fr.yoga.booking.service.business.exception.user.UserException;
 
-@SpringBootTest(properties = "async.enabled=false")
+@SpringBootTest
 @ActiveProfiles("test")
 public class ContactServiceEndToEndTest {
 	@Mock ScheduledClass bookedClass;
-	@Mock StudentRef student;
+	@Mock StudentRef studentRef;
+	@Mock Student student;
 	@Mock Lesson lesson;
 	@Mock LessonInfo lessonInfo;
 	@Mock Teacher teacher;
@@ -63,11 +65,13 @@ public class ContactServiceEndToEndTest {
 	
 	@BeforeEach
 	public void setup() throws UserException {
+		when(userService.getRegisteredStudent(anyString())).thenReturn(student);
+		when(student.getContact()).thenReturn(contact);
 		when(student.getDisplayName()).thenReturn("Aurélien");
-		when(userService.getContactInfo(any(StudentRef.class))).thenReturn(contact);
+		when(studentRef.getDisplayName()).thenReturn("Aurélien");
 		when(contact.getEmail()).thenReturn(System.getProperty("email.to"));
 		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
-		when(student.isRegistered()).thenReturn(false);
+		when(studentRef.isRegistered()).thenReturn(true);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
 		when(bookedClass.getEnd()).thenReturn(Instant.now().plus(1, HOURS));
@@ -92,7 +96,7 @@ public class ContactServiceEndToEndTest {
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void approvedBooking() throws MessagingException, UnreachableUserException, UserException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
-		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
+		contactService.sendMessage(student, new BookedNotification(bookedClass, studentRef));
 	}
 
 	/**
@@ -102,7 +106,7 @@ public class ContactServiceEndToEndTest {
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void waitingBooking() throws MessagingException, UnreachableUserException, UserException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(false);
-		contactService.sendMessage(student, new BookedNotification(bookedClass, student));
+		contactService.sendMessage(student, new BookedNotification(bookedClass, studentRef));
 	}
 	
 	/**
@@ -111,7 +115,7 @@ public class ContactServiceEndToEndTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void unbooked() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(student, new UnbookedNotification(bookedClass, student));
+		contactService.sendMessage(student, new UnbookedNotification(bookedClass, studentRef));
 	}
 
 	/**
@@ -138,7 +142,7 @@ public class ContactServiceEndToEndTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void freePlaceBooked() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(student, new FreePlaceBookedNotification(bookedClass, student));
+		contactService.sendMessage(student, new FreePlaceBookedNotification(bookedClass, studentRef));
 	}
 
 	/**
@@ -147,6 +151,24 @@ public class ContactServiceEndToEndTest {
 	@Test
 	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
 	public void reminder() throws MessagingException, UnreachableUserException, UserException {
-		contactService.sendMessage(student, new ReminderNotification(bookedClass, student));
+		contactService.sendMessage(student, new ReminderNotification(bookedClass, studentRef));
+	}
+
+	/**
+	 * Not a real test. Just use it to send an email or SMS
+	 */
+	@Test
+	@EnabledIf("#{systemProperties['mail.smtp.host'] != null}")
+	public void resetPasswordByEmail() throws MessagingException, UnreachableUserException, UserException {
+		contactService.sendResetPasswordMessage(student, contact.getEmail(), "token-1");
+	}
+
+	/**
+	 * Not a real test. Just use it to send an email or SMS
+	 */
+	@Test
+	@EnabledIf("#{systemProperties['ogham.sms.smpp.host'] != null}")
+	public void resetPasswordySms() throws MessagingException, UnreachableUserException, UserException {
+		contactService.sendResetPasswordMessage(student, contact.getPhoneNumber(), "token-1");
 	}
 }

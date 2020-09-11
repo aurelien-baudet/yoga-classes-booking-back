@@ -233,4 +233,7 @@ public class AccessControlService {
 		return true;
 	}
 
+	public boolean canChangePasswordForStudent(User currentUser, Student student) {
+		return hasAnyRole(currentUser, GOD);
+	}
 }

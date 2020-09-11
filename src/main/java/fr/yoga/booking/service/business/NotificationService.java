@@ -92,7 +92,7 @@ public class NotificationService {
 				sendPushNotification(student, notification);
 			}
 			if(!canReceivePushNotification(student) || shouldAlsoReceiveUsingOtherMeansOfCommunication(student, notification)) {
-				contactService.sendMessage(student, notification);
+				contactService.sendMessage(userService.getRegisteredStudent(student.getId()), notification);
 			}
 		} catch(NotificationException | UserException e) {
 			log.error("Failed to send push notification to {}", student.getDisplayName(), e);

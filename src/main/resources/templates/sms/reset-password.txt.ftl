@@ -1,0 +1,1 @@
+Saisissez le code ${token} pour réinitialiser votre mot de passe

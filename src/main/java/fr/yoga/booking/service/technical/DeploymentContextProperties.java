@@ -16,4 +16,5 @@ public class DeploymentContextProperties {
 	private String unbookPath = "classes/${id}?unbooking=${id}";
 	// TODO: unsubscribe emails url
 	private String unsubscribeEmailsPath = "TODO";
+	private String resetPasswordPath = "users/password/reset?code=${token}";
 }

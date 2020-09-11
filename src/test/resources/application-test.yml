@@ -1,18 +1,23 @@
 reminder:
   next-class: "4h"
+password-reset:
+  token-validity: "2s"
 deployment:
   web-app-base-url: https://yoga.abaudet.ovh
 
-#logging:
-#  level:
-##    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-#    fr.sii.ogham: TRACE
+async:
+  enabled: false
+scheduling:
+  enabled: false
 
-#spring:
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          google:
-#            client-id: 846418150945-l87u18f42ncvr0teel6cd6kjioepjaud.apps.googleusercontent.com
-#            client-secret: QgCd3xv6BYwfRIxawJQ_Q7dS
+ogham:
+  email:
+    from:
+      default-value: bar@yopmail.com
+  sms:
+    from:
+      default-value: 0700000000
+      
+logging:
+  level:
+    fr.yoga.booking: DEBUG

@@ -3,6 +3,7 @@ package fr.yoga.booking.it;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +28,7 @@ import fr.sii.ogham.core.service.MessagingService;
 import fr.sii.ogham.email.message.Email;
 import fr.sii.ogham.sms.message.Sms;
 import fr.yoga.booking.domain.account.ContactInfo;
+import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
@@ -46,12 +48,13 @@ import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
 import fr.yoga.booking.service.business.exception.user.UserException;
 
-@SpringBootTest(properties = "async.enabled=false")
+@SpringBootTest
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
 public class SmsOrEmailTest {
 	@Mock ScheduledClass bookedClass;
-	@Mock StudentRef student;
+	@Mock StudentRef studentRef;
+	@Mock Student student;
 	@Mock Lesson lesson;
 	@Mock LessonInfo lessonInfo;
 	@Mock Teacher teacher;
@@ -75,9 +78,10 @@ public class SmsOrEmailTest {
 	
 	@BeforeEach
 	public void setup() throws UserException {
-		when(student.getDisplayName()).thenReturn("Aurélien");
-		when(userService.getContactInfo(any(StudentRef.class))).thenReturn(contact);
-		when(student.isRegistered()).thenReturn(false);
+		when(userService.getRegisteredStudent(anyString())).thenReturn(student);
+		when(student.getContact()).thenReturn(contact);
+		when(studentRef.getDisplayName()).thenReturn("Aurélien");
+		when(studentRef.isRegistered()).thenReturn(true);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
 		when(bookedClass.getEnd()).thenReturn(Instant.now().plus(1, HOURS));
@@ -117,24 +121,24 @@ public class SmsOrEmailTest {
 	
 	Stream<Arguments> params() {
 		return Stream.of(
-	        arguments(null, "foo@yopmail.com", new BookedNotification(bookedClass, student), Email.class),
-	        arguments(null, "foo@yopmail.com", new UnbookedNotification(bookedClass, student), Email.class),
-	        arguments(null, "foo@yopmail.com", new FreePlaceBookedNotification(bookedClass, student), Email.class),
-	        arguments(null, "foo@yopmail.com", new ReminderNotification(bookedClass, student), Email.class),
+	        arguments(null, "foo@yopmail.com", new BookedNotification(bookedClass, studentRef), Email.class),
+	        arguments(null, "foo@yopmail.com", new UnbookedNotification(bookedClass, studentRef), Email.class),
+	        arguments(null, "foo@yopmail.com", new FreePlaceBookedNotification(bookedClass, studentRef), Email.class),
+	        arguments(null, "foo@yopmail.com", new ReminderNotification(bookedClass, studentRef), Email.class),
 	        arguments(null, "foo@yopmail.com", new PlaceChangedNotification(bookedClass, place, newPlace), Email.class),
 	        arguments(null, "foo@yopmail.com", new ClassCanceledNotification(bookedClass, cancelData), Email.class),
 
-	        arguments("0600000000", null, new BookedNotification(bookedClass, student), Sms.class),
-	        arguments("0600000000", null, new UnbookedNotification(bookedClass, student), Sms.class),
-	        arguments("0600000000", null, new FreePlaceBookedNotification(bookedClass, student), Sms.class),
-	        arguments("0600000000", null, new ReminderNotification(bookedClass, student), Sms.class),
+	        arguments("0600000000", null, new BookedNotification(bookedClass, studentRef), Sms.class),
+	        arguments("0600000000", null, new UnbookedNotification(bookedClass, studentRef), Sms.class),
+	        arguments("0600000000", null, new FreePlaceBookedNotification(bookedClass, studentRef), Sms.class),
+	        arguments("0600000000", null, new ReminderNotification(bookedClass, studentRef), Sms.class),
 	        arguments("0600000000", null, new PlaceChangedNotification(bookedClass, place, newPlace), Sms.class),
 	        arguments("0600000000", null, new ClassCanceledNotification(bookedClass, cancelData), Sms.class),
 
-	        arguments("0600000000", "foo@yopmail.com", new BookedNotification(bookedClass, student), Email.class),
-	        arguments("0600000000", "foo@yopmail.com", new UnbookedNotification(bookedClass, student), Email.class),
-	        arguments("0600000000", "foo@yopmail.com", new FreePlaceBookedNotification(bookedClass, student), Email.class),
-	        arguments("0600000000", "foo@yopmail.com", new ReminderNotification(bookedClass, student), Email.class),
+	        arguments("0600000000", "foo@yopmail.com", new BookedNotification(bookedClass, studentRef), Email.class),
+	        arguments("0600000000", "foo@yopmail.com", new UnbookedNotification(bookedClass, studentRef), Email.class),
+	        arguments("0600000000", "foo@yopmail.com", new FreePlaceBookedNotification(bookedClass, studentRef), Email.class),
+	        arguments("0600000000", "foo@yopmail.com", new ReminderNotification(bookedClass, studentRef), Email.class),
 	        arguments("0600000000", "foo@yopmail.com", new PlaceChangedNotification(bookedClass, place, newPlace), Sms.class),
 	        arguments("0600000000", "foo@yopmail.com", new ClassCanceledNotification(bookedClass, cancelData), Sms.class)
 		);
