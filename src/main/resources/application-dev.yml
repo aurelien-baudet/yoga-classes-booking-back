@@ -5,6 +5,9 @@ reminder:
   next-class: "4h"
 password-reset:
   token-validity: "2m"
+booking:
+  unbook-until: "1h"
+#  unbook-until: "5d"
 
 mail:
   smtp:

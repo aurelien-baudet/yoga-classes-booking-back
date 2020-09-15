@@ -1,5 +1,9 @@
 package fr.yoga.booking.service.business;
 
+import static fr.yoga.booking.domain.account.Role.GOD;
+import static fr.yoga.booking.domain.account.Role.TEACHER;
+import static fr.yoga.booking.util.UserUtils.hasAnyRole;
+import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 
 import java.time.Instant;
@@ -19,6 +23,7 @@ import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedExcep
 import fr.yoga.booking.service.business.exception.reservation.BookingException;
 import fr.yoga.booking.service.business.exception.reservation.NotBookedException;
 import fr.yoga.booking.service.business.exception.reservation.RemindBookingException;
+import fr.yoga.booking.service.business.exception.reservation.TooLateToUnbookException;
 import fr.yoga.booking.service.business.security.annotation.CanBookClass;
 import fr.yoga.booking.service.business.security.annotation.CanListApprovedBookings;
 import fr.yoga.booking.service.business.security.annotation.CanListBookedClasses;
@@ -33,6 +38,7 @@ public class BookingService {
 	private final NotificationService notificationService;
 	private final WaitingListStrategy waitingListStrategy;
 	private final ConfirmBookingStrategy confirmStrategy;
+	private final BookingProperties bookingProperties;
 	
 	@CanBookClass
 	public ScheduledClass book(ScheduledClass bookedClass, Student student, User bookedBy) throws BookingException {
@@ -68,10 +74,11 @@ public class BookingService {
 	}
 	
 	@CanUnbookClass
-	public ScheduledClass unbook(ScheduledClass bookedClass, StudentRef student, User canceledBy) throws NotBookedException {
+	public ScheduledClass unbook(ScheduledClass bookedClass, StudentRef student, User canceledBy) throws BookingException {
 		if(notBooked(bookedClass, student)) {
 			throw new NotBookedException(bookedClass, student);
 		}
+		checkCanUnbook(bookedClass, student, canceledBy);
 		boolean wasApproved = bookedClass.isApprovedFor(student);
 		ScheduledClass updatedClass = bookedClass.removeBookingForStudent(student);
 		updatedClass = scheduledClassRepository.save(updatedClass);
@@ -145,5 +152,14 @@ public class BookingService {
 
 	private boolean notBooked(ScheduledClass bookedClass, StudentRef student) {
 		return !scheduledClassRepository.existsBookedClassForStudent(bookedClass, student);
+	}
+	
+	private void checkCanUnbook(ScheduledClass bookedClass, StudentRef student, User canceledBy) throws BookingException {
+		if (hasAnyRole(canceledBy, GOD, TEACHER)) {
+			return;
+		}
+		if (now().isAfter(bookedClass.getStart().minus(bookingProperties.getUnbookUntil()))) {
+			throw new TooLateToUnbookException(bookedClass, student);
+		}
 	}
 }

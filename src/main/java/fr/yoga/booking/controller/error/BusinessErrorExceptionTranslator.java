@@ -11,6 +11,7 @@ import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedExcep
 import fr.yoga.booking.service.business.exception.reservation.NotBookedException;
 import fr.yoga.booking.service.business.exception.reservation.PlaceAlreadyTakenBySomeoneElseException;
 import fr.yoga.booking.service.business.exception.reservation.PlaceAlreadyTakenException;
+import fr.yoga.booking.service.business.exception.reservation.TooLateToUnbookException;
 import fr.yoga.booking.service.business.exception.user.ExpiredResetTokenException;
 import fr.yoga.booking.service.business.exception.user.InvalidResetTokenException;
 import fr.yoga.booking.service.business.exception.user.StudentNotFoundException;
@@ -58,6 +59,7 @@ public class BusinessErrorExceptionTranslator {
 	public ErrorDto expired(ExpiredResetTokenException e) {
 		return new ErrorDto("EXPIRED_TOKEN", e);
 	}
+	
 	@ExceptionHandler(PlaceAlreadyTakenException.class)
 	@ResponseStatus(HttpStatus.CONFLICT)
 	public ErrorDto placeAlreadyTaken(PlaceAlreadyTakenException e) {
@@ -70,6 +72,14 @@ public class BusinessErrorExceptionTranslator {
 	@ResponseStatus(HttpStatus.CONFLICT)
 	public ErrorDto placeAlreadyTaken(PlaceAlreadyTakenBySomeoneElseException e) {
 		return new ErrorDto("PLACE_ALREADY_TAKEN_BY_SOMEONE_ELSE", e)
+				.addData("classId", e.getBookedClass().getId())
+				.addData("studentId", e.getStudent().getId());
+	}
+	
+	@ExceptionHandler(TooLateToUnbookException.class)
+	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+	public ErrorDto expired(TooLateToUnbookException e) {
+		return new ErrorDto("TOO_LATE_TO_UNBOOK", e)
 				.addData("classId", e.getBookedClass().getId())
 				.addData("studentId", e.getStudent().getId());
 	}

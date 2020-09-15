@@ -14,6 +14,7 @@
 	
 	Si jamais vous avez un empêchement, pensez à annuler la réservation afin que quelqu'un puisse prendre votre place.
 	Plus vous prévenez tôt, mieux c'est pour les autres 🙂
+	Vous pouvez annuler jusqu'à ${statics['fr.yoga.booking.util.DurationUtil'].format(@bookingProperties.unbookUntil)} avant le début du cours. Au delà, il n'est plus possible d'annuler et votre séance est décomptée. Si vous avez un imprévu, vous pouvez tout de même me contacter pour qu'on s'arrange.
 	
 	Tarifs : 12 euros le cours d’essais, 15 euros le cours de passage.
 	Abonnement à l’association : 10 euros par an. 

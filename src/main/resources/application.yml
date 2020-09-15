@@ -3,10 +3,12 @@ cors:
   allowed-headers: Access-Control-Allow-Origin,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With,Accept,Accept-Language
 
 reminder:
-  next-class: "1h"
+  next-class: "1h30m"
 password-reset:
   token-validity: "1h"
   token-length: 8
+booking:
+  unbook-until: "1h"
 
 ogham:
   email:
