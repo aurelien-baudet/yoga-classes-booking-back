@@ -89,7 +89,7 @@ public class OneSignalNotificationConverters {
 						+ "Une place est libre pour le cours du ${T(fr.yoga.booking.util.DateRangeUtil).format(bookedClass)}.\n"
 						+ "\n"
 						+ "Merci de confirmer ta présence pour prendre la place.", notification))
-				.withButton(new Button("confirm-presence", "Confirmer présence", null, null))
+				.withButton(new Button("confirm-presence", "Prendre la place", null, null))
 				.withButton(new Button("unbook", "Pas disponible", null, null))
 				.withDataElement("classId", ((AvailablePlaceNotification) notification).getBookedClass().getId())
 				.build();
