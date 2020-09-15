@@ -5,7 +5,7 @@ cors:
 reminder:
   next-class: "1h"
 password-reset:
-  token-validity: "30m"
+  token-validity: "1h"
   token-length: 8
 
 ogham:

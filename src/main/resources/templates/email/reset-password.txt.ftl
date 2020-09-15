@@ -10,4 +10,4 @@ ou en saisissant le code suivant sur le site ou l'application : ${token}
 Changer votre mot de passe : ${@deploymentContextService.resetPasswordUrl(token)}
 
 
-Le lien et le code sont valables 30 minutes.
+Le lien et le code sont valables ${statics['fr.yoga.booking.util.DurationUtil'].format(@passwordResetProperties.tokenValidity)}.
