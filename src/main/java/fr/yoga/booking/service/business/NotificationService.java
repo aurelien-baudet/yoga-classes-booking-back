@@ -115,7 +115,7 @@ public class NotificationService {
 
 	private void tryEmailOrSms(StudentRef student, Notification notification) {
 		try {
-			contactService.sendMessage(userService.getRegisteredStudent(student.getId()), notification);
+			contactService.sendMessage(userService.getRegisteredStudent(student), notification);
 		} catch (MessagingException e) {
 			log.error("Failed to send email/sms to {}", student.getDisplayName(), e);
 			// TODO: handle correctly errors

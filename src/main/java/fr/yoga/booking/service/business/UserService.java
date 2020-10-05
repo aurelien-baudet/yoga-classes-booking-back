@@ -5,6 +5,7 @@ import static fr.yoga.booking.domain.account.Role.TEACHER;
 
 import java.util.List;
 
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ import fr.yoga.booking.service.business.exception.user.UnregisteredUserNotFoundE
 import fr.yoga.booking.service.business.exception.user.UserException;
 import fr.yoga.booking.service.business.exception.user.UserNotFoundException;
 import fr.yoga.booking.service.business.security.annotation.CanChangePasswordForStudent;
+import fr.yoga.booking.service.business.security.annotation.CanChangePasswordForTeacher;
 import fr.yoga.booking.service.business.security.annotation.CanCheckLoginAvailability;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterStudent;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterTeacher;
@@ -134,6 +136,16 @@ public class UserService {
 		throw new StudentNotFoundException(studentId);
 	}
 	
+	// TODO: secure ?
+	public Student getRegisteredStudent(StudentRef ref) throws UserException {
+		try {
+			return getRegisteredStudent(ref.getId());
+		} catch (StudentNotFoundException e) {
+			// skip
+		}
+		throw new StudentNotFoundException(ref.getId());
+	}
+	
 //	// TODO: secure ?
 //	public ContactInfo getContactInfo(StudentRef student) throws UserException {
 //		return getContactInfo(student.getId());
@@ -180,14 +192,31 @@ public class UserService {
 	
 
 	public void requestPasswordReset(String emailOrPhoneNumber) throws PasswordResetException {
-		List<Student> matches = studentRepository.findByEmailOrPhoneNumber(emailOrPhoneNumber);
-		if (matches.isEmpty()) {
-			log.warn("[reset-password] No user found for email address or phone number '{}'", emailOrPhoneNumber);
+		List<Student> students = studentRepository.findByEmailOrPhoneNumber(emailOrPhoneNumber);
+		if (students.isEmpty()) {
+			log.warn("[reset-password] No student found for email address or phone number '{}'", emailOrPhoneNumber);
 		}
-		for (Student student : matches) {
+		for (Student student : students) {
 			try {
 				String token = tokenService.generateResetToken(student, emailOrPhoneNumber);
 				contactService.sendResetPasswordMessage(student, emailOrPhoneNumber, token);
+			} catch (MessagingException e) {
+				log.error("Failed to send message to reset password", e);
+			}
+		}
+		// If there are matching students, do not even try to send message to teacher.
+		// It could be a hack attempt
+		if (!students.isEmpty()) {
+			return;
+		}
+		List<Teacher> teachers = teacherRepository.findByEmailOrPhoneNumber(emailOrPhoneNumber);
+		if (teachers.isEmpty()) {
+			log.warn("[reset-password] No teacher found for email address or phone number '{}'", emailOrPhoneNumber);
+		}
+		for (Teacher teacher : teachers) {
+			try {
+				String token = tokenService.generateResetToken(teacher, emailOrPhoneNumber);
+				contactService.sendResetPasswordMessage(teacher, emailOrPhoneNumber, token);
 			} catch (MessagingException e) {
 				log.error("Failed to send message to reset password", e);
 			}
@@ -201,19 +230,44 @@ public class UserService {
 	public void resetPassword(String token, String newPassword) throws PasswordResetException {
 		User user = tokenService.validateResetToken(token);
 		try {
-			Student student = getRegisteredStudent(user.getId());
-			changePassword(student, newPassword);
+			changePassword(user, newPassword);
 			tokenService.invalidateResetToken(token);
 		} catch (UserException e) {
 			throw new PasswordResetException("Failed to reset password for "+user.getDisplayName(), e);
 		}
 	}
 	
-	
+	private void changePassword(User user, String newPassword) throws PasswordResetException, UserException {
+		try {
+			Student student = getRegisteredStudent(user.getId());
+			changePassword(student, newPassword);
+			return;
+		} catch (UserException e) {
+			// skip
+		}
+		try {
+			Teacher teacher = getTeacher(user.getId());
+			changePassword(teacher, newPassword);
+			return;
+		} catch (UserException e) {
+			// skip
+		}
+		throw new UserNotFoundException(user.getId());
+	}
+
 	@CanChangePasswordForStudent
 	public void changePassword(Student student, String newPassword) throws PasswordResetException {
-		student.getAccount().setPassword(passwordService.encodePassword(newPassword));
-		studentRepository.save(student);
+		changePassword(student, newPassword, studentRepository);
+	}
+
+	@CanChangePasswordForTeacher
+	public void changePassword(Teacher teacher, String newPassword) throws PasswordResetException {
+		changePassword(teacher, newPassword, teacherRepository);
+	}
+	
+	private <T extends User> void changePassword(T user, String newPassword, MongoRepository<T, String> repository) {
+		user.getAccount().setPassword(passwordService.encodePassword(newPassword));
+		repository.save(user);
 	}
 	
 	

@@ -4,7 +4,7 @@ cors:
 reminder:
   next-class: "4h"
 password-reset:
-  token-validity: "2m"
+  token-validity: "10m"
 booking:
   unbook-until: "1h"
 #  unbook-until: "5d"

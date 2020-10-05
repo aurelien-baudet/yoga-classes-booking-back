@@ -4,7 +4,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import fr.yoga.booking.domain.account.Teacher;
 
-public interface TeacherRepository extends MongoRepository<Teacher, String> {
+public interface TeacherRepository extends MongoRepository<Teacher, String>, CustomizedTeacherRepository {
 	boolean existsByAccountLogin(String login);
 	Teacher findOneByAccountLogin(String login);
 }

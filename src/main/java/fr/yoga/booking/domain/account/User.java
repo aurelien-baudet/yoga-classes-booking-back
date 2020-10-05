@@ -1,5 +1,7 @@
 package fr.yoga.booking.domain.account;
 
+import javax.validation.constraints.NotNull;
+
 import org.springframework.data.annotation.Id;
 
 import lombok.AllArgsConstructor;
@@ -16,9 +18,19 @@ public abstract class User {
 	private String id;
 	private String displayName;
 	private Account account;
+	@NotNull
+	private ContactInfo contact;
 	
+	public User(String id) {
+		this(id, null, null, new ContactInfo());
+	}
+
 	public User(String displayName, Account account) {
-		this(null, displayName, account);
+		this(displayName, account, new ContactInfo());
+	}
+
+	public User(String displayName, Account account, ContactInfo contact) {
+		this(null, displayName, account, contact);
 	}
 
 	public boolean isSame(User other) {

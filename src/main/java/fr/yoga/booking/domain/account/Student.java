@@ -12,8 +12,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=true)
 public class Student extends User {
 	@NotNull
-	private ContactInfo contact;
-	@NotNull
 	private Preferences preferences;
 	
 	public Student() {
@@ -21,14 +19,12 @@ public class Student extends User {
 	}
 	
 	public Student(String id) {
-		super(id, null, null);
-		contact = new ContactInfo();
+		super(id);
 		preferences = new Preferences();
 	}
 	
 	public Student(String displayName, Account account, ContactInfo contact, Preferences preferences) {
-		super(displayName, account);
-		this.contact = contact;
+		super(displayName, account, contact);
 		this.preferences = preferences;
 	}
 }

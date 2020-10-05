@@ -8,6 +8,7 @@ import static fr.yoga.booking.util.UserUtils.isSameUser;
 import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.Student;
+import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.reservation.Lesson;
@@ -234,6 +235,10 @@ public class AccessControlService {
 	}
 
 	public boolean canChangePasswordForStudent(User currentUser, Student student) {
+		return hasAnyRole(currentUser, GOD);
+	}
+
+	public boolean canChangePasswordForTeacher(User currentUser, Teacher teacher) {
 		return hasAnyRole(currentUser, GOD);
 	}
 

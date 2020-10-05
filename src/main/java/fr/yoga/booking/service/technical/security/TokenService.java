@@ -5,7 +5,6 @@ import static java.time.Instant.now;
 import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.PasswordResetToken;
-import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.repository.PasswordResetTokenRepository;
 import fr.yoga.booking.service.business.PasswordResetProperties;
@@ -21,9 +20,9 @@ public class TokenService {
 	private final RandomGenerator random;
 	private final PasswordResetProperties resetProperties;
 
-	public String generateResetToken(Student student, String emailOrPhoneNumber) {
+	public String generateResetToken(User user, String emailOrPhoneNumber) {
 		String token = random.generate(resetProperties.getTokenLength());
-		tokenRepository.save(new PasswordResetToken(student, token));
+		tokenRepository.save(new PasswordResetToken(user, token));
 		return token;
 	}
 

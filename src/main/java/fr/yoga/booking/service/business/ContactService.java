@@ -33,20 +33,20 @@ public class ContactService {
 	}
 
 	@Async
-	public void sendResetPasswordMessage(Student student, String emailOrPhoneNumber, String token) throws MessagingException {
-		Message message = prepareResetPasswordMessage(student, emailOrPhoneNumber, token);
+	public void sendResetPasswordMessage(User user, String emailOrPhoneNumber, String token) throws MessagingException {
+		Message message = prepareResetPasswordMessage(user, emailOrPhoneNumber, token);
 		messagingService.send(message);		
 	}
 	
-	private Message prepareResetPasswordMessage(Student student, String emailOrPhoneNumber, String token) {
+	private Message prepareResetPasswordMessage(User user, String emailOrPhoneNumber, String token) {
 		if (isEmail(emailOrPhoneNumber)) {
 			return new Email()
-					.to(student.getContact().getEmail())
-					.body().template("reset-password", new PasswordReset(student, token));
+					.to(user.getContact().getEmail())
+					.body().template("reset-password", new PasswordReset(user, token));
 		}
 		return new Sms()
-				.to(student.getContact().getPhoneNumber())
-				.message().template("reset-password", new PasswordReset(student, token));
+				.to(user.getContact().getPhoneNumber())
+				.message().template("reset-password", new PasswordReset(user, token));
 	}
 
 	private Message prepareMessage(Student student, Notification notification) throws UserException {
