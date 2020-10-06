@@ -130,7 +130,7 @@ public class BookingService {
 	}
 	
 	public void remindStudentsAboutNextClass(Reminder reminder) throws RemindBookingException {
-		ScheduledClass nextClass = scheduledClassRepository.findById(reminder.getScheduledClassId()).orElse(null);
+		ScheduledClass nextClass = scheduledClassRepository.findById(reminder.getScheduledClass().getId()).orElse(null);
 		if (nextClass == null) {
 			return;
 		}
@@ -138,7 +138,7 @@ public class BookingService {
 				.stream()
 				.map(b -> b.getStudent())
 				.collect(toList());
-		notificationService.reminder(nextClass, approvedStudents);
+//		notificationService.reminder(nextClass, approvedStudents);
 	}
 
 
