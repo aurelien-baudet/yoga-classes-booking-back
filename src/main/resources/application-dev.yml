@@ -2,7 +2,8 @@ cors:
   allowed-origins: "*"
 
 reminder:
-  next-class: "4h"
+  next-class: "4d,3d,2d,3h,2h,1h,4h,1d"
+  clean-interval: "PT1H"
 password-reset:
   token-validity: "10m"
 booking:

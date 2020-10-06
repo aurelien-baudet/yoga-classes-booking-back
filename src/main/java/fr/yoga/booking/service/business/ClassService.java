@@ -23,8 +23,8 @@ import fr.yoga.booking.service.business.exception.LessonNotFoundException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassNotFoundException;
 import fr.yoga.booking.service.business.security.annotation.CanCancelClass;
-import fr.yoga.booking.service.business.security.annotation.CanChangePlace;
 import fr.yoga.booking.service.business.security.annotation.CanChangeAllPlaces;
+import fr.yoga.booking.service.business.security.annotation.CanChangePlace;
 import fr.yoga.booking.service.business.security.annotation.CanListClassesForLesson;
 import fr.yoga.booking.service.business.security.annotation.CanListFutureClasses;
 import fr.yoga.booking.service.business.security.annotation.CanListLessons;
@@ -42,7 +42,6 @@ public class ClassService {
 	private final ScheduledClassRepository scheduledClassRepository;
 	private final LessonRepository lessonRepository;
 	private final NotificationService notificationService;
-	private final ReminderService reminderService;
 
 	@CanRegisterLesson
 	public Lesson register(LessonInfo data, Place place, Teacher teacher) throws ScheduledClassException {
@@ -53,9 +52,7 @@ public class ClassService {
 	@CanScheduleClass
 	public ScheduledClass schedule(Lesson lesson, Instant start, Instant end) throws ScheduledClassException {
 		ScheduledClass scheduledClass = new ScheduledClass(start, end, lesson);
-		ScheduledClass savedClass = scheduledClassRepository.save(scheduledClass);
-		reminderService.registerReminderForClass(savedClass);
-		return savedClass;
+		return scheduledClassRepository.save(scheduledClass);
 	}
 	
 	@CanCancelClass
@@ -63,7 +60,6 @@ public class ClassService {
 		// update class
 		scheduledClass.setState(new Canceled(addtionalInfo.getMessage()));
 		ScheduledClass updated = scheduledClassRepository.save(scheduledClass);
-		reminderService.unregisterReminderForClass(updated);
 		// notify every participant
 		notificationService.classCanceled(updated, addtionalInfo);
 		return updated;
