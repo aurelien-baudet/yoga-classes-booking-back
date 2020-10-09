@@ -1,5 +1,23 @@
+low-balance:
+  remaining-classes: 1
+  month-card-remaining-duration: "5d"
+  annual-card-remaining-duration: "10d"
+
 reminder:
-  next-class: "4h"
+  next-class:
+    trigger-before: "4h"
+  subscription:
+    remaining-classes:
+      trigger-before-next-class: "1d"
+    month-card:
+      trigger-before-next-class: "2d"
+      trigger-before-expiration: "3d"
+    annual-card:
+      trigger-before-next-class: "4d"
+      trigger-before-expiration: "5d"
+  register-interval: "PT1M"
+  clean-interval: "PT1H"
+  
 password-reset:
   token-validity: "2s"
 deployment:

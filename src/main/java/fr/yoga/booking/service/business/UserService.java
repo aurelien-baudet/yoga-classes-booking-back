@@ -98,8 +98,8 @@ public class UserService {
 	}
 
 	@CanRegisterTeacher
-	public Teacher registerTeacher(String displayName, Credentials credentials) throws AccountException {
-		Teacher teacher = new Teacher(displayName, new Account(passwordService.encodePassword(credentials), TEACHER));
+	public Teacher registerTeacher(String displayName, Credentials credentials, ContactInfo contact) throws AccountException {
+		Teacher teacher = new Teacher(displayName, new Account(passwordService.encodePassword(credentials), TEACHER), contact);
 		// check that user doesn't already exist
 		if(exists(teacher)) {
 			throw new AlreadyRegisteredUser(teacher);

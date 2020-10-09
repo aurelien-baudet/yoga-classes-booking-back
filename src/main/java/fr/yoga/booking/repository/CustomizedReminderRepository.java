@@ -6,6 +6,6 @@ import java.util.List;
 import fr.yoga.booking.domain.notification.Reminder;
 
 public interface CustomizedReminderRepository {
-	List<Reminder> findByRemindAtBefore(Instant date);
-	List<Reminder> findByRemindAtBetween(Instant after, Instant before);
+	List<Reminder<?>> findByRemindAtBefore(Instant date);
+	List<Reminder<?>> findByRemindAtBetween(Instant after, Instant before);
 }

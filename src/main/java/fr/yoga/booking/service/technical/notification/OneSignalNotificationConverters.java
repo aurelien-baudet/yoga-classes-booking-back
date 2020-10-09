@@ -1,5 +1,6 @@
 package fr.yoga.booking.service.technical.notification;
 
+import static fr.yoga.booking.util.DateUtil.formatDate;
 import static fr.yoga.booking.util.ExpressionParser.evaluate;
 
 import java.io.UnsupportedEncodingException;
@@ -12,6 +13,8 @@ import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
+import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
+import fr.yoga.booking.domain.notification.RenewMonthCardNotification;
 import fr.yoga.booking.domain.reservation.Place;
 
 public class OneSignalNotificationConverters {
@@ -109,6 +112,62 @@ public class OneSignalNotificationConverters {
 						+ "Si tu ne peux pas être présent, pense à te désinscrire pour laisser la place à une autre personne.", notification))
 				.withButton(new Button("unbook", "Me désinscrire", null, null))
 				.withDataElement("classId", ((ReminderNotification) notification).getNextClass().getId())
+				.build();
+		};
+	}
+
+	public static OneSignalNotificationConverter unpaidClasses() {
+		return (notification, builder) -> {
+			return builder
+				.withHeading("en", evaluate("💲 Cours impayé(s)", notification))
+				.withContent("en", evaluate("Tu as ${subscription.unpaidClasses} cours impayé(s).\n"
+						+ "\n"
+						+ "Pense à payer tes séances au prochain cours de Yoga.\n"
+						+ "Tu peux également voir avec Cyril pour prendre un abonnement.\n"
+						+ "\n"
+						+ "Merci", notification))
+				.build();
+		};
+	}
+
+	public static OneSignalNotificationConverter renewClassPackageCard() {
+		return (notification, builder) -> {
+			return builder
+				.withHeading("en", evaluate("💲 Renouvellement d'abonnement", notification))
+				.withContent("en", evaluate("Il te reste ${subscription.remainingClasses} cours sur ta carte.\n"
+						+ "\n"
+						+ "Pense à renouveller ta carte au prochain cours de Yoga.\n"
+						+ "Tu peux également voir avec Cyril pour prendre un autre abonnement.\n"
+						+ "\n"
+						+ "Merci", notification))
+				.build();
+		};
+	}
+
+	public static OneSignalNotificationConverter renewMonthCard() {
+		return (notification, builder) -> {
+			return builder
+				.withHeading("en", evaluate("💲 Renouvellement d'abonnement", notification))
+				.withContent("en", evaluate("Ton abonnement mensuel se termine le "+formatDate(((RenewMonthCardNotification) notification).getSubscription().getMonthCard().getEnd())+".\n"
+						+ "\n"
+						+ "Pense à le renouveller si tu souhaites continuer les cours de Yoga.\n"
+						+ "Tu peux également voir avec Cyril pour prendre un autre abonnement.\n"
+						+ "\n"
+						+ "Merci", notification))
+				.build();
+		};
+	}
+
+	public static OneSignalNotificationConverter renewAnnualCard() {
+		return (notification, builder) -> {
+			return builder
+				.withHeading("en", evaluate("💲 Renouvellement d'abonnement", notification))
+				.withContent("en", evaluate("Ton abonnement annuel se termine le "+formatDate(((RenewAnnualCardNotification) notification).getSubscription().getAnnualCard().getEnd())+".\n"
+						+ "\n"
+						+ "Pense à le renouveller si tu souhaites continuer les cours de Yoga.\n"
+						+ "Tu peux également voir avec Cyril pour prendre un autre abonnement.\n"
+						+ "\n"
+						+ "Merci", notification))
 				.build();
 		};
 	}

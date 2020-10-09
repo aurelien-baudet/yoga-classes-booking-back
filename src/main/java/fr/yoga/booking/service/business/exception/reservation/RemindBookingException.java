@@ -11,9 +11,9 @@ public class RemindBookingException extends Exception {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private final Reminder reminder;
+	private final Reminder<?> reminder;
 
-	public RemindBookingException(Reminder reminder, String message, Throwable cause) {
+	public RemindBookingException(Reminder<?> reminder, String message, Throwable cause) {
 		super(message, cause);
 		this.reminder = reminder;
 	}

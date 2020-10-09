@@ -1,0 +1,2 @@
+Bonjour ${subscription.subscriber.displayName}, il te reste ${subscription.remainingClasses} cours sur ta carte. Pense à renouveller ta carte au prochain cours de Yoga. Tu peux également voir avec Cyril pour prendre un autre abonnement.
+Merci

@@ -1,26 +1,28 @@
 package fr.yoga.booking.service.business;
 
+import static fr.yoga.booking.util.DateUtil.midday;
 import static java.time.Instant.now;
-import static java.util.Collections.emptyList;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.data.domain.Sort.Order.asc;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.SortedSet;
 
-import org.joda.time.Instant;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import fr.yoga.booking.domain.notification.Reminded;
 import fr.yoga.booking.domain.notification.Reminder;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
-import fr.yoga.booking.repository.RemindedRepository;
+import fr.yoga.booking.domain.subscription.PeriodCard;
+import fr.yoga.booking.domain.subscription.UserSubscriptions;
 import fr.yoga.booking.repository.ScheduledClassRepository;
+import fr.yoga.booking.service.business.ReminderProperties.SubscriptionProperties;
 import fr.yoga.booking.service.business.exception.reservation.RemindBookingException;
+import fr.yoga.booking.service.business.exception.user.UserException;
+import fr.yoga.booking.service.technical.scheduling.ReminderHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,129 +30,129 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ReminderService {
+	private final ReminderHelper helper;
 	private final ScheduledClassRepository classesRepository;
-	private final RemindedRepository remindedRepository;
 	private final BookingService bookingService;
+	private final SubscriptionService subscriptionService;
+	private final UserService userService;
 	private final ReminderProperties reminderProperties;
 
-//	public void registerReminderForClass(ScheduledClass savedClass) {
-//		reminderRepository.save(new Reminder(savedClass, reminderProperties.getNextClass()
-//				.stream()
-//				.map(time -> savedClass.getStart().minus(time))
-//				.collect(toList())));
-//	}
-//
-//	public void unregisterReminderForClass(ScheduledClass updated) {
-//		reminderRepository.deleteByScheduledClassId(updated.getId());
-//	}
 	
-	
-	@Scheduled(fixedRateString="PT1M")
-	private void checkClassesToRemind() {
-		trigger(findClassesToRemind());
-	}
-	
-	@Scheduled(fixedRateString="${reminder.clean-interval:P1D}")
-	private void cleanOldReminders() {
-		remindedRepository.deleteAllByScheduledClassStartDateBefore(Instant.now());
-	}
-	
-	private List<Reminder> findClassesToRemind() {
-		Duration firstReminderInTime = reminderProperties.getNextClass().last();
-		if (firstReminderInTime == null) {
-			return emptyList();
+	@Scheduled(initialDelay = 0, fixedRateString="${reminder.register-interval}")
+	public void registerRemindersForNextClasses() {
+		for (ScheduledClass scheduledClass : findFutureClasses()) {
+			List<Reminder<ScheduledClass>> reminders = toReminders(scheduledClass);
+			helper.scheduleOnceFutureOrMostRecentReminders(reminders);
 		}
-		// find classes that are not already started
-		List<ScheduledClass> futureClasses = classesRepository.findByStartAfter(now(), Sort.by(asc("start")));
-		// start date is after the greater reminder date in the past
-		// keep only those that have not already been triggered
-		return toRemindersThatNeedToBeTriggered(futureClasses);
 	}
 
+	private List<ScheduledClass> findFutureClasses() {
+		return classesRepository.findByStartAfter(now(), Sort.by(asc("start")));
+	}
 
-
-	private void trigger(List<Reminder> reminders) {
-		for (Reminder reminder : reminders) {
-			log.info("Trigger reminder {} before start of class {} ({})", reminder.getReminder(), reminder.getScheduledClass().getId(), reminder.getScheduledClass().getStart());
+	private List<Reminder<ScheduledClass>> toReminders(ScheduledClass scheduledClass) {
+		List<Reminder<ScheduledClass>> reminders = new ArrayList<>();
+		for (Duration remindBefore : reminderProperties.getNextClass().getTriggerBefore()) {
+			reminders.add(new Reminder<>("next-class|"+scheduledClass.getId()+"|"+remindBefore, 
+					scheduledClass, 
+					scheduledClass.getStart().minus(remindBefore), 
+					getRemindAboutNextClassTask(remindBefore, scheduledClass),
+					scheduledClass.getStart()));
+		}
+		return reminders;
+	}
+	
+	private Runnable getRemindAboutNextClassTask(Duration remindBefore, ScheduledClass nextClass) {
+		return () -> {
 			try {
-				bookingService.remindStudentsAboutNextClass(reminder);
-				markAsTriggered(reminder);
+				log.info("Trigger reminder {} before start of class {} ({})", remindBefore, nextClass.getId(), nextClass.getStart());
+				bookingService.remindStudentsAboutNextClass(nextClass);
 			} catch (RemindBookingException e) {
 				log.warn("Failed to remind students about next class", e);
-				// TODO: Should handle properly this error
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
+	@Scheduled(initialDelay = 0, fixedRateString="${reminder.register-interval}")
+	public void registerRemindersForSubscriptions() {
+		for (UserSubscriptions subscription : findSubscriptionsThatAreExpiredOrAboutToExpire()) {
+			try {
+				List<Reminder<UserSubscriptions>> reminders = toReminders(subscription);
+				helper.scheduleOnceFutureOrMostRecentReminders(reminders);
+			} catch (UserException e) {
+				log.warn("Fail to remind user about subscription expiration", e);
 			}
 		}
 	}
 
-	private void markAsTriggered(Reminder reminder) {
-		remindedRepository.save(new Reminded(reminder));
-		// also save reminders that are past
-		for (Duration d : reminderProperties.getNextClass()) {
-			if (isPastReminder(reminder, d) && !isAlreadyMarkedAsTriggered(reminder, d)) {
-				log.info("Also mark reminder {} triggered for {} ({})", d, reminder.getScheduledClass().getId(), reminder.getScheduledClass().getStart());
-				remindedRepository.save(new Reminded(new Reminder(reminder.getScheduledClass(), d)));
-			}
-		}
-	}
 
-	private boolean isPastReminder(Reminder reminder, Duration d) {
-		return d.compareTo(reminder.getReminder()) > 0;
-	}
-
-	private boolean isAlreadyMarkedAsTriggered(Reminder reminder, Duration d) {
-		return remindedRepository.existsByScheduledClassIdAndReminder(reminder.getScheduledClass().getId(), d);
-	}
-
-	private boolean alreadyReminded(Reminder reminder) {
-		return remindedRepository.existsByScheduledClassIdAndReminder(reminder.getScheduledClass().getId(), reminder.getReminder());
-	}
-	
-	private List<Reminder> toRemindersThatNeedToBeTriggered(List<ScheduledClass> classes) {
-		return classes.stream()
-				.map(this::keepNotTriggered)
-				.filter(Objects::nonNull)
+	private List<UserSubscriptions> findSubscriptionsThatAreExpiredOrAboutToExpire() {
+		return subscriptionService.getCurrentSubscriptions().stream()
+				.filter(subscriptionService::isExpiredOrAboutToExpire)
 				.collect(toList());
 	}
-	
-	private Reminder keepNotTriggered(ScheduledClass scheduledClass) {
-		return reminderProperties.getNextClass().stream()
-				.map(r -> new Reminder(scheduledClass, r))
-				.filter(Reminder::isNowBetweenReminderAndStartOfClass)
-				.filter(not(this::alreadyReminded))
-				.findFirst()
-				.orElse(null);
+
+	private List<Reminder<UserSubscriptions>> toReminders(UserSubscriptions subscription) throws UserException {
+		List<Reminder<UserSubscriptions>> reminders = new ArrayList<>();
+		SubscriptionProperties subscriptionProps = reminderProperties.getSubscription();
+		if (subscriptionService.isAnnualCardAboutToExpire(subscription)) {
+			addRemindersToTriggerBeforeExpirationDate(subscription, subscription.getAnnualCard(), subscriptionProps.getAnnualCard().getTriggerBeforeExpiration(), reminders);
+			addRemindersToTriggerBeforeNextClass(subscription, subscriptionProps.getAnnualCard().getTriggerBeforeNextClass(), reminders);
+			return reminders;
+		}
+		if (subscriptionService.isMonthCardAboutToExpire(subscription)) {
+			addRemindersToTriggerBeforeExpirationDate(subscription, subscription.getMonthCard(), subscriptionProps.getMonthCard().getTriggerBeforeExpiration(), reminders);
+			addRemindersToTriggerBeforeNextClass(subscription, subscriptionProps.getMonthCard().getTriggerBeforeNextClass(), reminders);
+			return reminders;
+		}
+		if (subscriptionService.isNotEnoughRemainingClasses(subscription)) {
+			addRemindersToTriggerBeforeNextClass(subscription, subscriptionProps.getRemainingClasses().getTriggerBeforeNextClass(), reminders);
+			return reminders;
+		}
+		// TODO: merge to avoid double notification if same trigger date ?
+		return reminders;
 	}
+
+	private void addRemindersToTriggerBeforeNextClass(UserSubscriptions subscription, SortedSet<Duration> remindBeforeSet, List<Reminder<UserSubscriptions>> reminders) throws UserException {
+		ScheduledClass nextClassForStudent = bookingService.getNextClassForStudent(userService.getRegisteredStudent(subscription.getSubscriber()));
+		if (nextClassForStudent == null) {
+			return;
+		}
+		for (Duration remindBefore : remindBeforeSet) {
+			reminders.add(new Reminder<>("subscription-next-class|"+subscription.getId()+"|"+remindBefore, 
+					subscription, 
+					nextClassForStudent.getStart().minus(remindBefore), 
+					getRemindToRenewSubscriptionBeforeNextClass(remindBefore, subscription, nextClassForStudent),
+					nextClassForStudent.getStart()));
+		}
+	}
+
+	private Runnable getRemindToRenewSubscriptionBeforeNextClass(Duration remindBefore, UserSubscriptions subscription, ScheduledClass nextClass) {
+		return () -> {
+			log.info("Trigger reminder {} before start of next class {} ({})", remindBefore, nextClass.getId(), nextClass.getStart());
+			subscriptionService.remindToRenewSubscription(subscription, nextClass);
+		};
+	}
+
+	private void addRemindersToTriggerBeforeExpirationDate(UserSubscriptions subscription, PeriodCard card, SortedSet<Duration> remindBeforeSet, List<Reminder<UserSubscriptions>> reminders) {
+		for (Duration remindBefore : remindBeforeSet) {
+			reminders.add(new Reminder<>("subscription-expiration|"+subscription.getId()+"|"+remindBefore, 
+					subscription, 
+					midday(card.getEnd().minus(remindBefore)), 
+					getRemindToRenewSubscriptionBeforeExpiration(remindBefore, subscription, card),
+					card.getEnd()));
+		}
+	}
+
 	
-	
-//	@Scheduled(fixedRateString="PT1M")
-//	private void checkClassesToRemind() {
-//		try {
-//			Instant before = now().plus(1, MINUTES);
-//			List<Reminder> reminders = reminderRepository.findByRemindAtBefore(before);
-//			for(Reminder reminder : reminders) {
-//				bookingService.remindStudentsAboutNextClass(reminder);
-//				List<Instant> updatedRemindAt = removeMatchingRemindAtDates(before, reminder);
-//				reminder.setRemindAt(updatedRemindAt);
-//				// remove if no more reminder date
-//				// update if there remains dates
-//				if(updatedRemindAt.isEmpty()) {
-//					reminderRepository.delete(reminder);
-//				} else {
-//					reminder.setRemindAt(updatedRemindAt);
-//					reminderRepository.save(reminder);
-//				}
-//			}
-//		} catch(RemindBookingException e) {
-//			log.warn("Failed to remind students about next class", e);
-//			// TODO: Should handle properly this error
-//		}
-//	}
-//
-//	private List<Instant> removeMatchingRemindAtDates(Instant before, Reminder reminder) {
-//		List<Instant> updatedRemindAt = reminder.getRemindAt()
-//			.stream()
-//			.dropWhile(i -> i.isBefore(before))
-//			.collect(toList());
-//		return updatedRemindAt;
-//	}
+	private Runnable getRemindToRenewSubscriptionBeforeExpiration(Duration remindBefore, UserSubscriptions subscription, PeriodCard card) {
+		return () -> {
+			log.info("Trigger reminder {} before expiration of card ({})", remindBefore, card.getEnd());
+			subscriptionService.remindToRenewSubscription(subscription);
+		};
+	}
+
+
+
 }

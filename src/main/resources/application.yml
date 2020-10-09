@@ -2,8 +2,25 @@ cors:
   allowed-methods: GET,POST,OPTIONS,PATCH,PUT,DELETE
   allowed-headers: Access-Control-Allow-Origin,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With,Accept,Accept-Language
 
+low-balance:
+  remaining-classes: 1
+  month-card-remaining-duration: "5d"
+  annual-card-remaining-duration: "5d"
+
 reminder:
-  next-class: "90m"
+  next-class:
+    trigger-before: "90m"
+  subscription:
+    remaining-classes:
+      trigger-before-next-class: "1d"
+    month-card:
+      trigger-before-next-class: "1d"
+      trigger-before-expiration: "5d"
+    annual-card:
+      trigger-before-next-class: "1d"
+      trigger-before-expiration: "5d"
+  register-interval: "PT10M"
+  clean-interval: "PT1D"
 password-reset:
   token-validity: "1h"
   token-length: 8

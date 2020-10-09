@@ -1,0 +1,2 @@
+Bonjour ${subscription.subscriber.displayName}, tu as ${subscription.unpaidClasses} cours impayé(s). Pense à payer tes séances au prochain cours de Yoga. Tu peux également voir avec Cyril pour prendre un abonnement.
+Merci

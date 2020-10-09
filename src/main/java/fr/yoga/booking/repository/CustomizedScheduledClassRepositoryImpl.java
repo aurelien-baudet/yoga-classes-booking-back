@@ -1,5 +1,6 @@
 package fr.yoga.booking.repository;
 
+import static org.springframework.data.domain.Sort.Order.asc;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -8,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
@@ -40,6 +42,23 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 	@Override
 	public List<ScheduledClass> findNextBookedClassesForStudent(UnregisteredUser student) {
 		return findNextBookedClassesForStudent(new StudentRef(student));
+	}
+
+	@Override
+	public ScheduledClass findNextBookedClassForStudent(StudentRef student) {
+		Criteria where = where("start").gte(Instant.now())
+				.and("bookings").elemMatch(userCriteria(student));
+		return mongo.findOne(query(where).with(Sort.by(asc("start"))).limit(1), ScheduledClass.class);
+	}
+
+	@Override
+	public ScheduledClass findNextBookedClassForStudent(Student student) {
+		return findNextBookedClassForStudent(new StudentRef(student));
+	}
+
+	@Override
+	public ScheduledClass findNextBookedClassForStudent(UnregisteredUser student) {
+		return findNextBookedClassForStudent(new StudentRef(student));
 	}
 
 	@Override

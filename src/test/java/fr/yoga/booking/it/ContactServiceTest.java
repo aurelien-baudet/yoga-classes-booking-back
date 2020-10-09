@@ -1,5 +1,6 @@
 package fr.yoga.booking.it;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -35,13 +36,19 @@ import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
+import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
+import fr.yoga.booking.domain.notification.RenewClassPackageCardNotification;
+import fr.yoga.booking.domain.notification.RenewMonthCardNotification;
 import fr.yoga.booking.domain.notification.UnbookedNotification;
+import fr.yoga.booking.domain.notification.UnpaidClassesNotification;
 import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentRef;
+import fr.yoga.booking.domain.subscription.PeriodCard;
+import fr.yoga.booking.domain.subscription.UserSubscriptions;
 import fr.yoga.booking.service.business.ContactService;
 import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
@@ -69,6 +76,8 @@ public class ContactServiceTest {
 	@Mock Place newPlace;
 	@Mock CancelData cancelData;
 	@Mock ContactInfo contact;
+	@Mock UserSubscriptions subscription;
+	@Mock PeriodCard card;
 	@MockBean UserService userService;
 	
 	@Autowired ContactService contactService;
@@ -88,7 +97,6 @@ public class ContactServiceTest {
 		when(userService.getRegisteredStudent(anyString())).thenReturn(student);
 		when(student.getContact()).thenReturn(contact);
 		when(studentRef.getDisplayName()).thenReturn("Aurélien");
-//		when(contact.getPhoneNumber()).thenReturn(System.getProperty("sms.to"));
 		when(studentRef.isRegistered()).thenReturn(true);
 		when(bookedClass.getId()).thenReturn("123456");
 		when(bookedClass.getStart()).thenReturn(Instant.now());
@@ -105,6 +113,12 @@ public class ContactServiceTest {
 		when(newPlace.getName()).thenReturn("Terre Sainte");
 		when(newPlace.getAddress()).thenReturn("128 rue Amiral Lacaze, Saint Pierre");
 		when(cancelData.getMessage()).thenReturn("Cours annulé en raison de la pluie...\nEt j'ai la flemme");
+		when(subscription.getUnpaidClasses()).thenReturn(2);
+		when(subscription.getRemainingClasses()).thenReturn(1);
+		when(subscription.getMonthCard()).thenReturn(card);
+		when(subscription.getAnnualCard()).thenReturn(card);
+		when(subscription.getSubscriber()).thenReturn(studentRef);
+		when(card.getEnd()).thenReturn(Instant.now().plus(5, DAYS));
 	}
 
 	@Test
@@ -181,6 +195,34 @@ public class ContactServiceTest {
 		OghamAssertions.assertThat(greenMail).receivedMessages().count(is(1));
 	}
 
+	@Test
+	public void emailForUnpaidClasses() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
+		contactService.sendMessage(student, new UnpaidClassesNotification(subscription));
+
+		OghamAssertions.assertThat(greenMail).receivedMessages().count(is(1));
+	}
+
+	@Test
+	public void emailForRenewMonthCard() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
+		contactService.sendMessage(student, new RenewMonthCardNotification(subscription));
+
+		OghamAssertions.assertThat(greenMail).receivedMessages().count(is(1));
+	}
+
+	@Test
+	public void emailForRenewAnnualCard() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getEmail()).thenReturn("foo@yopmail.com");
+
+		contactService.sendMessage(student, new RenewAnnualCardNotification(subscription));
+
+		OghamAssertions.assertThat(greenMail).receivedMessages().count(is(1));
+	}
+
+
 
 
 	@Test
@@ -253,6 +295,42 @@ public class ContactServiceTest {
 		when(contact.getPhoneNumber()).thenReturn("0600000000");
 
 		contactService.sendMessage(student, new ReminderNotification(bookedClass, studentRef));
+
+		OghamAssertions.assertThat(smppServer).receivedMessages().count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForUnpaidClasses() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new UnpaidClassesNotification(subscription));
+
+		OghamAssertions.assertThat(smppServer).receivedMessages().count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForRenewClassPackageCard() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new RenewClassPackageCardNotification(subscription));
+
+		OghamAssertions.assertThat(smppServer).receivedMessages().count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForRenewMonthCard() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new RenewMonthCardNotification(subscription));
+
+		OghamAssertions.assertThat(smppServer).receivedMessages().count(greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void smsForRenewAnnualCard() throws MessagingException, UnreachableUserException, UserException {
+		when(contact.getPhoneNumber()).thenReturn("0600000000");
+
+		contactService.sendMessage(student, new RenewAnnualCardNotification(subscription));
 
 		OghamAssertions.assertThat(smppServer).receivedMessages().count(greaterThanOrEqualTo(1));
 	}

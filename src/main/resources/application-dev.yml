@@ -1,9 +1,26 @@
 cors:
   allowed-origins: "*"
 
+low-balance:
+  remaining-classes: 1
+  month-card-remaining-duration: "5d"
+  annual-card-remaining-duration: "5d"
+
 reminder:
-  next-class: "4d,3d,2d,3h,2h,1h,4h,1d"
-  clean-interval: "PT1H"
+  next-class:
+    trigger-before: "1d,90m"
+  subscription:
+    remaining-classes:
+      trigger-before-next-class: "1d"
+    month-card:
+      trigger-before-next-class: "1d"
+      trigger-before-expiration: "5d"
+    annual-card:
+      remains: "5d"
+      trigger-before-next-class: "1d"
+      trigger-before-expiration: "5d"
+  register-interval: "PT1M"
+  clean-interval: "PT1M"
 password-reset:
   token-validity: "10m"
 booking:
@@ -30,8 +47,6 @@ logging:
   level:
     fr.yoga.booking: DEBUG
     #org.springframework.security: DEBUG
-#logging:
-#  level:
 #    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 
 #spring:

@@ -1,5 +1,6 @@
 package fr.yoga.booking.repository;
 
+import static java.util.Collections.unmodifiableList;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -19,15 +20,15 @@ public class CustomizedReminderRepositoryImpl implements CustomizedReminderRepos
 	private final MongoOperations mongo;
 
 	@Override
-	public List<Reminder> findByRemindAtBetween(Instant after, Instant before) {
+	public List<Reminder<?>> findByRemindAtBetween(Instant after, Instant before) {
 		Criteria where = where("remindAt").elemMatch(where("").gte(after).lt(before));
-		return mongo.find(query(where), Reminder.class);
+		return unmodifiableList(mongo.find(query(where), Reminder.class));
 	}
 
 	@Override
-	public List<Reminder> findByRemindAtBefore(Instant date) {
+	public List<Reminder<?>> findByRemindAtBefore(Instant date) {
 		Criteria where = where("remindAt").elemMatch(where("").lt(date));
-		return mongo.find(query(where), Reminder.class);
+		return unmodifiableList(mongo.find(query(where), Reminder.class));
 	}
 
 }

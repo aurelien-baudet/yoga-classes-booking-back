@@ -2,7 +2,6 @@ package fr.yoga.booking.domain.notification;
 
 import static java.time.Instant.now;
 
-import java.time.Duration;
 import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
@@ -19,12 +18,12 @@ import lombok.NoArgsConstructor;
 public class Reminded {
 	@Id
 	private String id;
-	private String scheduledClassId;
-	private Instant scheduledClassStartDate;
-	private Duration reminder;
+	private String reminderId;
 	private Instant triggeredAt;
+	private Instant cleanableAt;
+	private Instant remindedAt;
 	
-	public Reminded(Reminder reminder) {
-		this(null, reminder.getScheduledClass().getId(), reminder.getScheduledClass().getStart(), reminder.getReminder(), now());
+	public Reminded(Reminder<?> reminder) {
+		this(null, reminder.getId(), reminder.getTriggerAt(), reminder.getCleanableAt(), now());
 	}
 }

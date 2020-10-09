@@ -1,5 +1,6 @@
 package fr.yoga.booking.e2e;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -20,19 +21,25 @@ import fr.sii.ogham.core.exception.MessagingException;
 import fr.yoga.booking.domain.account.ContactInfo;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
+import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
-import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
+import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
+import fr.yoga.booking.domain.notification.RenewClassPackageCardNotification;
+import fr.yoga.booking.domain.notification.RenewMonthCardNotification;
 import fr.yoga.booking.domain.notification.UnbookedNotification;
+import fr.yoga.booking.domain.notification.UnpaidClassesNotification;
 import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.Lesson;
 import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentRef;
+import fr.yoga.booking.domain.subscription.PeriodCard;
+import fr.yoga.booking.domain.subscription.UserSubscriptions;
 import fr.yoga.booking.service.business.ContactService;
 import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
@@ -51,6 +58,8 @@ public class ContactServiceEndToEndTest {
 	@Mock Place newPlace;
 	@Mock CancelData cancelData;
 	@Mock ContactInfo contact;
+	@Mock UserSubscriptions subscription;
+	@Mock PeriodCard card;
 	@MockBean UserService userService;
 	
 	@Autowired ContactService contactService;
@@ -88,6 +97,12 @@ public class ContactServiceEndToEndTest {
 		when(newPlace.getName()).thenReturn("Terre Sainte");
 		when(newPlace.getAddress()).thenReturn("128 rue Amiral Lacaze, Saint Pierre");
 		when(cancelData.getMessage()).thenReturn("Cours annulé en raison de la pluie...\nEt j'ai la flemme");
+		when(subscription.getUnpaidClasses()).thenReturn(2);
+		when(subscription.getRemainingClasses()).thenReturn(1);
+		when(subscription.getMonthCard()).thenReturn(card);
+		when(subscription.getAnnualCard()).thenReturn(card);
+		when(subscription.getSubscriber()).thenReturn(studentRef);
+		when(card.getEnd()).thenReturn(Instant.now().plus(5, DAYS));
 	}
 
 	/**
@@ -180,5 +195,41 @@ public class ContactServiceEndToEndTest {
 	@EnabledIf("#{systemProperties['ogham.sms.smpp.host'] != null}")
 	public void resetPasswordySms() throws MessagingException, UnreachableUserException, UserException {
 		contactService.sendResetPasswordMessage(student, contact.getPhoneNumber(), "token-1");
+	}
+
+	/**
+	 * Not a real test. Just use it to send an email or SMS
+	 */
+	@Test
+	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
+	public void unpaidClasses() throws MessagingException, UnreachableUserException, UserException {
+		contactService.sendMessage(student, new UnpaidClassesNotification(subscription));
+	}
+
+	/**
+	 * Not a real test. Just use it to send an email or SMS
+	 */
+	@Test
+	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
+	public void renewClassPackageCard() throws MessagingException, UnreachableUserException, UserException {
+		contactService.sendMessage(student, new RenewClassPackageCardNotification(subscription));
+	}
+
+	/**
+	 * Not a real test. Just use it to send an email or SMS
+	 */
+	@Test
+	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
+	public void renewMonthCard() throws MessagingException, UnreachableUserException, UserException {
+		contactService.sendMessage(student, new RenewMonthCardNotification(subscription));
+	}
+
+	/**
+	 * Not a real test. Just use it to send an email or SMS
+	 */
+	@Test
+	@EnabledIf("#{systemProperties['mail.smtp.host'] != null || systemProperties['ogham.sms.smpp.host'] != null}")
+	public void renewAnnualCard() throws MessagingException, UnreachableUserException, UserException {
+		contactService.sendMessage(student, new RenewAnnualCardNotification(subscription));
 	}
 }

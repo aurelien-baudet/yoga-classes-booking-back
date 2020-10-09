@@ -13,13 +13,18 @@ import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
 import fr.yoga.booking.domain.notification.Notification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
+import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
+import fr.yoga.booking.domain.notification.RenewClassPackageCardNotification;
+import fr.yoga.booking.domain.notification.RenewMonthCardNotification;
 import fr.yoga.booking.domain.notification.UnbookedNotification;
+import fr.yoga.booking.domain.notification.UnpaidClassesNotification;
 import fr.yoga.booking.domain.notification.UserPushToken;
 import fr.yoga.booking.domain.reservation.Booking;
 import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentRef;
+import fr.yoga.booking.domain.subscription.UserSubscriptions;
 import fr.yoga.booking.repository.PushNotificationTokenRepository;
 import fr.yoga.booking.service.business.exception.NotificationException;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
@@ -92,6 +97,30 @@ public class NotificationService {
 		for(StudentRef student : waitingStudents) {
 			notify(student, new AvailablePlaceNotification(scheduledClass, student));
 		}
+	}
+
+	public void unpaidClasses(UserSubscriptions subscription) {
+		log.info("[{}] {} has unpaid classes", subscription.getSubscriber().getId(), subscription.getSubscriber().getDisplayName());
+		StudentRef student = subscription.getSubscriber();
+		notify(student, new UnpaidClassesNotification(subscription));
+	}
+
+	public void renewClassPackageCard(UserSubscriptions subscription) {
+		log.info("[{}] {} needs to renew class package card", subscription.getSubscriber().getId(), subscription.getSubscriber().getDisplayName());
+		StudentRef student = subscription.getSubscriber();
+		notify(student, new RenewClassPackageCardNotification(subscription));
+	}
+
+	public void renewMonthCard(UserSubscriptions subscription) {
+		log.info("[{}] {} needs to renew month card", subscription.getSubscriber().getId(), subscription.getSubscriber().getDisplayName());
+		StudentRef student = subscription.getSubscriber();
+		notify(student, new RenewMonthCardNotification(subscription));
+	}
+
+	public void renewAnnualCard(UserSubscriptions subscription) {
+		log.info("[{}] {} needs to renew annual card", subscription.getSubscriber().getId(), subscription.getSubscriber().getDisplayName());
+		StudentRef student = subscription.getSubscriber();
+		notify(student, new RenewAnnualCardNotification(subscription));
 	}
 
 	private void notify(StudentRef student, Notification notification) {

@@ -113,4 +113,10 @@ public class ScheduledClass {
 		int numBookings = approvedStudents().size();
 		return numBookings >= maxStudents;
 	}
+	
+
+	@Transient
+	public boolean isCanceled() {
+		return getState() instanceof Canceled;
+	}
 }

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout.html :: head(~{::title}, ~{::link})">
+	<title>Cours impayé(s)</title>
+	<link th:href="@{css/message-layout.css}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<header th:replace="fragments/layout.html :: header(~{::h1}, ~{}, ~{})">
+		<h1>Cours impayé(s)</h1>
+	</header>
+	<div class="message">
+		<p>
+			Bonjour <span class="username">[[${subscription.subscriber.displayName}]]</span>,<br />
+			<br />
+			Tu as [[${subscription.unpaidClasses}]] cours impayé(s). <br />
+			Pense à payer tes séances au prochain cours de Yoga. <br />
+			Tu peux également voir avec Cyril pour prendre un abonnement. <br />
+			<br />
+			Merci
+		</p>
+	</div>
+</body>
+</html>

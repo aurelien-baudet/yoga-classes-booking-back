@@ -1,0 +1,2 @@
+Bonjour ${subscription.subscriber.displayName}, ton abonnement mensuel se termine le ${statics['fr.yoga.booking.util.DateUtil'].formatDate(subscription.monthCard.end)}. Pense à le renouveller si tu souhaites continuer les cours de Yoga. Tu peux également voir avec Cyril pour prendre un autre abonnement.
+Merci

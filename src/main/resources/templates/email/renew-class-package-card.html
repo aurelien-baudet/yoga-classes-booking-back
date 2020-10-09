@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout.html :: head(~{::title}, ~{::link})">
+	<title>Renouvellement de ton abonnement</title>
+	<link th:href="@{css/message-layout.css}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<header th:replace="fragments/layout.html :: header(~{::h1}, ~{}, ~{})">
+		<h1>Renouvellement de ton abonnement</h1>
+	</header>
+	<div class="message">
+		<p>
+			Bonjour <span class="username">[[${subscription.subscriber.displayName}]]</span>,<br />
+			<br />
+			Il te reste [[${subscription.remainingClasses}]] cours sur ta carte. <br />
+			Pense à renouveller ta carte au prochain cours de Yoga si tu souhaites en reprendre une. <br />
+			Tu peux également voir avec Cyril pour prendre un autre abonnement. <br />
+			<br />
+			Merci
+		</p>
+	</div>
+</body>
+</html>

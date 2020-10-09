@@ -246,4 +246,23 @@ public class AccessControlService {
 		// anyone is allowed to take a place to a class if he has already booked it
 		return bookedClass.allStudents().stream().anyMatch(s -> s.isSame(student));
 	}
+	
+	public boolean canUpdateSubscriptionsForStudent(User currentUser, Student student) {
+		return hasAnyRole(currentUser, GOD, TEACHER);
+	}
+	
+	public boolean canListSubscriptions(User currentUser) {
+		return hasAnyRole(currentUser, GOD, TEACHER);
+	}
+	
+	public boolean canViewSubscriptionsForStudent(User currentUser, Student student) {
+		if (hasAnyRole(currentUser, GOD, TEACHER)) {
+			return true;
+		}
+		// can see his own subscriptions
+		if(isSameUser(currentUser, student)) {
+			return true;
+		}
+		return false;
+	}
 }

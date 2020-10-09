@@ -58,6 +58,6 @@ public class UserController {
 
 	@PostMapping("teachers")
 	public Teacher regiterTeacher(@RequestBody NewTeacher newTeacher) throws AccountException {
-		return userService.registerTeacher(newTeacher.getDisplayName(), newTeacher.getCredentials());
+		return userService.registerTeacher(newTeacher.getDisplayName(), newTeacher.getCredentials(), newTeacher.getContact());
 	}
 }

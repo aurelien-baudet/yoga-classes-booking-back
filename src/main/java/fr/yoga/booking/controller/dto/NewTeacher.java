@@ -1,5 +1,6 @@
 package fr.yoga.booking.controller.dto;
 
+import fr.yoga.booking.domain.account.ContactInfo;
 import fr.yoga.booking.domain.account.Credentials;
 import lombok.Data;
 
@@ -7,4 +8,5 @@ import lombok.Data;
 public class NewTeacher {
 	private String displayName;
 	private Credentials credentials;
+	private ContactInfo contact;
 }

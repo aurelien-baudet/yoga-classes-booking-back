@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.UnregisteredUser;
 import fr.yoga.booking.domain.account.User;
-import fr.yoga.booking.domain.notification.Reminder;
 import fr.yoga.booking.domain.reservation.Booking;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentRef;
@@ -129,9 +128,12 @@ public class BookingService {
 		return confirmStrategy.confirm(bookedClass, student, bookedBy);
 	}
 	
-	public void remindStudentsAboutNextClass(Reminder reminder) throws RemindBookingException {
-		ScheduledClass nextClass = scheduledClassRepository.findById(reminder.getScheduledClass().getId()).orElse(null);
+	public void remindStudentsAboutNextClass(ScheduledClass scheduledClass) throws RemindBookingException {
+		ScheduledClass nextClass = scheduledClassRepository.findById(scheduledClass.getId()).orElse(null);
 		if (nextClass == null) {
+			return;
+		}
+		if (nextClass.isCanceled()) {
 			return;
 		}
 		List<StudentRef> approvedStudents = listApprovedBookings(nextClass)
@@ -142,6 +144,11 @@ public class BookingService {
 	}
 
 
+	public ScheduledClass getNextClassForStudent(Student student) {
+		return scheduledClassRepository.findNextBookedClassForStudent(student);
+	}
+	
+	
 	private boolean isAutomaticallyApproved(ScheduledClass scheduledClass) {
 		return !scheduledClass.isApprovedListFull();
 	}
@@ -162,4 +169,6 @@ public class BookingService {
 			throw new TooLateToUnbookException(bookedClass, student);
 		}
 	}
+	
+
 }

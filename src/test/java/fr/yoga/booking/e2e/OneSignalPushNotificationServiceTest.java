@@ -1,5 +1,6 @@
 package fr.yoga.booking.e2e;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,11 +26,15 @@ import fr.yoga.booking.domain.account.ContactInfo;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.User;
+import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
-import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
+import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
+import fr.yoga.booking.domain.notification.RenewClassPackageCardNotification;
+import fr.yoga.booking.domain.notification.RenewMonthCardNotification;
+import fr.yoga.booking.domain.notification.UnpaidClassesNotification;
 import fr.yoga.booking.domain.reservation.CancelData;
 import fr.yoga.booking.domain.reservation.Image;
 import fr.yoga.booking.domain.reservation.Lesson;
@@ -36,6 +42,8 @@ import fr.yoga.booking.domain.reservation.LessonInfo;
 import fr.yoga.booking.domain.reservation.Place;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentRef;
+import fr.yoga.booking.domain.subscription.PeriodCard;
+import fr.yoga.booking.domain.subscription.UserSubscriptions;
 import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.NotificationException;
 import fr.yoga.booking.service.business.exception.PlaceException;
@@ -58,8 +66,10 @@ public class OneSignalPushNotificationServiceTest {
 	@Mock Image newPlaceImage;
 	@Mock CancelData cancelData;
 	@Mock ContactInfo contact;
+	@Mock UserSubscriptions subscription;
+	@Mock PeriodCard card;
 	@MockBean UserService userService;
-	String token = "5bbcaf25-d3cd-4e4d-ac30-dba9fd719888";
+	@Value("${onesignal.token:null}") String token;
 	
 	@Autowired OneSignalPushNotificationService onesignalService;
 
@@ -101,6 +111,12 @@ public class OneSignalPushNotificationServiceTest {
 		when(newPlaceImage.getType()).thenReturn("STATIC_MAP");
 		when(newPlaceImage.getUrl()).thenReturn(new URL("https://drive.google.com/uc?export=view&id=1Ukd3cxRvnOc6IdHiGJy8BAYdPQpM6mX_"));
 		when(cancelData.getMessage()).thenReturn("Cours annulé en raison de la pluie...\nEt j'ai la flemme");
+		when(subscription.getUnpaidClasses()).thenReturn(2);
+		when(subscription.getRemainingClasses()).thenReturn(1);
+		when(subscription.getMonthCard()).thenReturn(card);
+		when(subscription.getAnnualCard()).thenReturn(card);
+		when(subscription.getSubscriber()).thenReturn(studentRef);
+		when(card.getEnd()).thenReturn(Instant.now().plus(5, DAYS));
 	}
 
 
@@ -137,5 +153,29 @@ public class OneSignalPushNotificationServiceTest {
 	public void reminder() throws MessagingException, UnreachableUserException, NotificationException {
 		when(bookedClass.isApprovedFor(Mockito.any())).thenReturn(true);
 		onesignalService.sendPushNotification(user, token, new ReminderNotification(bookedClass, studentRef));
+	}
+
+	@Test
+	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
+	public void unpaidClasses() throws MessagingException, UnreachableUserException, NotificationException {
+		onesignalService.sendPushNotification(user, token, new UnpaidClassesNotification(subscription));
+	}
+
+	@Test
+	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
+	public void renewClassPackageCard() throws MessagingException, UnreachableUserException, NotificationException {
+		onesignalService.sendPushNotification(user, token, new RenewClassPackageCardNotification(subscription));
+	}
+
+	@Test
+	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
+	public void renewMonthCard() throws MessagingException, UnreachableUserException, NotificationException {
+		onesignalService.sendPushNotification(user, token, new RenewMonthCardNotification(subscription));
+	}
+
+	@Test
+	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
+	public void renewAnnualCard() throws MessagingException, UnreachableUserException, NotificationException {
+		onesignalService.sendPushNotification(user, token, new RenewAnnualCardNotification(subscription));
 	}
 }

@@ -1,0 +1,17 @@
+@import "variables";
+
+
+.username {
+	font-weight: bold;
+}
+
+
+.header {
+	padding: value($reset-password, "header.padding");
+}
+
+.message {
+	background: value($details, "background.default-color") url('../images/lesson-description-background.jpg') no-repeat;
+	color: value($details, "color");
+}
+
