@@ -1,11 +1,9 @@
 package fr.yoga.booking.repository;
 
-import static java.util.Collections.unmodifiableList;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.MongoOperations;
