@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,15 +18,20 @@ import org.springframework.stereotype.Service;
 
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
+import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.domain.subscription.PeriodCard;
 import fr.yoga.booking.domain.subscription.UserSubscriptions;
 import fr.yoga.booking.repository.StudentRepository;
 import fr.yoga.booking.repository.SubscriptionRepository;
+import fr.yoga.booking.service.business.exception.user.UserException;
 import fr.yoga.booking.service.business.security.annotation.CanListSubscriptions;
 import fr.yoga.booking.service.business.security.annotation.CanUpdateSubscriptionsForStudent;
 import fr.yoga.booking.service.business.security.annotation.CanViewSubscriptionsForStudent;
+import fr.yoga.booking.service.technical.event.ClassStarted;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscriptionService {
@@ -33,6 +39,7 @@ public class SubscriptionService {
 	private final LowBalanceProperties lowBalanceProperties;
 	private final NotificationService notificationService;
 	private final StudentRepository studentRepository;
+	private final UserService userService;
 
 	@CanUpdateSubscriptionsForStudent
 	public UserSubscriptions addPaidClasses(Student student, int numPaid) {
@@ -71,8 +78,29 @@ public class SubscriptionService {
 				.collect(toList());
 		return new PageImpl<>(subscriptionsPerStudent, students.getPageable(), students.getTotalElements());
 	}
-
+	
+	@EventListener
+	public void updateSubscriptionsWhenClassIsStarted(ClassStarted event) {
+		ScheduledClass followedClass = event.getScheduledClass();
+		if (followedClass.isCanceled()) {
+			return;
+		}
+		for (StudentRef student : followedClass.approvedStudents()) {
+			takePartInClass(student, followedClass);
+		}
+	}
+	
+	public void takePartInClass(StudentRef student, ScheduledClass followedClass) {
+		try {
+			takePartInClass(userService.getRegisteredStudent(student), followedClass);
+		} catch (UserException e) {
+			// this should never happen
+			log.error("Failed to update subscriptions for {} [{}]", student.getDisplayName(), student.getId(), e);
+		}
+	}
+	
 	public UserSubscriptions takePartInClass(Student student, ScheduledClass followedClass) {
+		log.debug("Update subscriptions for '{}' [{}] after start of class '{}' at {} [{}]", student.getDisplayName(), student.getId(), followedClass.getLesson().getInfo().getTitle(), followedClass.getStart(), followedClass.getId());
 		UserSubscriptions current = getSubscriptionsFor(student);
 		if (current.hasValidAnnualCard() || current.hasValidMonthCard()) {
 			return current;

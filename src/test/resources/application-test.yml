@@ -16,6 +16,7 @@ reminder:
       trigger-before-next-class: "4d"
       trigger-before-expiration: "5d"
   register-interval: "PT1M"
+scheduler:
   clean-interval: "PT1H"
   
 password-reset:

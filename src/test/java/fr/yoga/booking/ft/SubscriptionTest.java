@@ -327,7 +327,6 @@ class SubscriptionTest {
 		subscriptionService.addPaidClasses(odile, 4);
 		assertPaidClasses(odile, 2);
 	}
-
 	
 	private void assertPaidClasses(Student student, int numPaid) {
 		UserSubscriptions subscription = subscriptionService.getSubscriptionsFor(student);

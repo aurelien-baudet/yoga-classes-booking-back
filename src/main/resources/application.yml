@@ -20,6 +20,7 @@ reminder:
       trigger-before-next-class: "1d"
       trigger-before-expiration: "5d"
   register-interval: "PT10M"
+scheduler:
   clean-interval: "PT24H"
 password-reset:
   token-validity: "1h"

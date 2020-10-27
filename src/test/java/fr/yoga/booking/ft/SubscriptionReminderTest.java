@@ -58,14 +58,15 @@ import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.reservation.BookingException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassException;
 import fr.yoga.booking.service.business.exception.user.AccountException;
-import fr.yoga.booking.service.technical.scheduling.ReminderHelper;
+import fr.yoga.booking.service.technical.scheduling.SchedulingHelper;
 
 @SpringBootTest(properties = {
 	"security.enabled=false",
 	"mail.smtp.host=127.0.0.1",
 	"mail.smtp.port=${greenmail.smtp.port}",
 	"ogham.sms.smpp.host=127.0.0.1",
-	"ogham.sms.smpp.port=${jsmpp.server.port}"
+	"ogham.sms.smpp.port=${jsmpp.server.port}",
+	"scheduling.enable-class-events=false"
 })
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {GreenMailInitializer.class, JsmppServerInitializer.class})
@@ -83,7 +84,7 @@ class SubscriptionReminderTest {
 	@Autowired BookingService bookingService;
 	@Autowired ReminderService reminderService;
 	@Autowired ReminderProperties reminderProps;
-	@Autowired ReminderHelper helper;
+	@Autowired SchedulingHelper helper;
 	
 	@MockBean TaskScheduler scheduler;
 	@Captor ArgumentCaptor<Runnable> runnableCaptor;

@@ -14,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import fr.yoga.booking.domain.notification.Reminder;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.subscription.PeriodCard;
 import fr.yoga.booking.domain.subscription.UserSubscriptions;
@@ -22,7 +21,8 @@ import fr.yoga.booking.repository.ScheduledClassRepository;
 import fr.yoga.booking.service.business.ReminderProperties.SubscriptionProperties;
 import fr.yoga.booking.service.business.exception.reservation.RemindBookingException;
 import fr.yoga.booking.service.business.exception.user.UserException;
-import fr.yoga.booking.service.technical.scheduling.ReminderHelper;
+import fr.yoga.booking.service.technical.scheduling.SchedulingHelper;
+import fr.yoga.booking.service.technical.scheduling.Trigger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ReminderService {
-	private final ReminderHelper helper;
+	private final SchedulingHelper helper;
 	private final ScheduledClassRepository classesRepository;
 	private final BookingService bookingService;
 	private final SubscriptionService subscriptionService;
@@ -41,8 +41,8 @@ public class ReminderService {
 	@Scheduled(initialDelay = 0, fixedRateString="${reminder.register-interval}")
 	public void registerRemindersForNextClasses() {
 		for (ScheduledClass scheduledClass : findFutureClasses()) {
-			List<Reminder<ScheduledClass>> reminders = toReminders(scheduledClass);
-			helper.scheduleOnceFutureOrMostRecentReminders(reminders);
+			List<Trigger<ScheduledClass>> reminders = toReminders(scheduledClass);
+			helper.scheduleOnceFutureOrMostRecentTriggers(reminders);
 		}
 	}
 
@@ -50,11 +50,12 @@ public class ReminderService {
 		return classesRepository.findByStartAfter(now(), Sort.by(asc("start")));
 	}
 
-	private List<Reminder<ScheduledClass>> toReminders(ScheduledClass scheduledClass) {
-		List<Reminder<ScheduledClass>> reminders = new ArrayList<>();
+	private List<Trigger<ScheduledClass>> toReminders(ScheduledClass scheduledClass) {
+		List<Trigger<ScheduledClass>> reminders = new ArrayList<>();
 		for (Duration remindBefore : reminderProperties.getNextClass().getTriggerBefore()) {
-			reminders.add(new Reminder<>("next-class|"+scheduledClass.getId()+"|"+remindBefore, 
+			reminders.add(new Trigger<>("next-class|"+scheduledClass.getId()+"|"+remindBefore, 
 					scheduledClass, 
+					"next-class",
 					scheduledClass.getStart().minus(remindBefore), 
 					getRemindAboutNextClassTask(remindBefore, scheduledClass),
 					scheduledClass.getStart()));
@@ -78,8 +79,8 @@ public class ReminderService {
 	public void registerRemindersForSubscriptions() {
 		for (UserSubscriptions subscription : findSubscriptionsThatAreExpiredOrAboutToExpire()) {
 			try {
-				List<Reminder<UserSubscriptions>> reminders = toReminders(subscription);
-				helper.scheduleOnceFutureOrMostRecentReminders(reminders);
+				List<Trigger<UserSubscriptions>> reminders = toReminders(subscription);
+				helper.scheduleOnceFutureOrMostRecentTriggers(reminders);
 			} catch (UserException e) {
 				log.warn("Fail to remind user about subscription expiration", e);
 			}
@@ -93,8 +94,8 @@ public class ReminderService {
 				.collect(toList());
 	}
 
-	private List<Reminder<UserSubscriptions>> toReminders(UserSubscriptions subscription) throws UserException {
-		List<Reminder<UserSubscriptions>> reminders = new ArrayList<>();
+	private List<Trigger<UserSubscriptions>> toReminders(UserSubscriptions subscription) throws UserException {
+		List<Trigger<UserSubscriptions>> reminders = new ArrayList<>();
 		SubscriptionProperties subscriptionProps = reminderProperties.getSubscription();
 		if (subscriptionService.isAnnualCardAboutToExpire(subscription)) {
 			addRemindersToTriggerBeforeExpirationDate(subscription, subscription.getAnnualCard(), subscriptionProps.getAnnualCard().getTriggerBeforeExpiration(), reminders);
@@ -114,14 +115,15 @@ public class ReminderService {
 		return reminders;
 	}
 
-	private void addRemindersToTriggerBeforeNextClass(UserSubscriptions subscription, SortedSet<Duration> remindBeforeSet, List<Reminder<UserSubscriptions>> reminders) throws UserException {
+	private void addRemindersToTriggerBeforeNextClass(UserSubscriptions subscription, SortedSet<Duration> remindBeforeSet, List<Trigger<UserSubscriptions>> reminders) throws UserException {
 		ScheduledClass nextClassForStudent = bookingService.getNextClassForStudent(userService.getRegisteredStudent(subscription.getSubscriber()));
 		if (nextClassForStudent == null) {
 			return;
 		}
 		for (Duration remindBefore : remindBeforeSet) {
-			reminders.add(new Reminder<>("subscription-next-class|"+subscription.getId()+"|"+remindBefore, 
+			reminders.add(new Trigger<>("subscription-next-class|"+subscription.getId()+"|"+nextClassForStudent.getId()+"|"+remindBefore, 
 					subscription, 
+					"subscription-next-class",
 					nextClassForStudent.getStart().minus(remindBefore), 
 					getRemindToRenewSubscriptionBeforeNextClass(remindBefore, subscription, nextClassForStudent),
 					nextClassForStudent.getStart()));
@@ -135,10 +137,11 @@ public class ReminderService {
 		};
 	}
 
-	private void addRemindersToTriggerBeforeExpirationDate(UserSubscriptions subscription, PeriodCard card, SortedSet<Duration> remindBeforeSet, List<Reminder<UserSubscriptions>> reminders) {
+	private void addRemindersToTriggerBeforeExpirationDate(UserSubscriptions subscription, PeriodCard card, SortedSet<Duration> remindBeforeSet, List<Trigger<UserSubscriptions>> reminders) {
 		for (Duration remindBefore : remindBeforeSet) {
-			reminders.add(new Reminder<>("subscription-expiration|"+subscription.getId()+"|"+remindBefore, 
+			reminders.add(new Trigger<>("subscription-expiration|"+subscription.getId()+"|"+remindBefore, 
 					subscription, 
+					"subscription-expiration",
 					midday(card.getEnd().minus(remindBefore)), 
 					getRemindToRenewSubscriptionBeforeExpiration(remindBefore, subscription, card),
 					card.getEnd()));

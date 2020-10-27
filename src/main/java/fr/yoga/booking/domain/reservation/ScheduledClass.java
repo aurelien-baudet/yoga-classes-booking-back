@@ -13,10 +13,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import fr.yoga.booking.domain.reservation.Booking.SortByAscendingDateComparator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Document
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class ScheduledClass {
 	@Id
 	private String id;
@@ -118,5 +120,12 @@ public class ScheduledClass {
 	@Transient
 	public boolean isCanceled() {
 		return getState() instanceof Canceled;
+	}
+	
+	public boolean isSame(ScheduledClass other) {
+		if (id == null) {
+			return false;
+		}
+		return id.equals(other.getId());
 	}
 }
