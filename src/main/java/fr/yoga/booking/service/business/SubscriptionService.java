@@ -1,5 +1,6 @@
 package fr.yoga.booking.service.business;
 
+import static fr.yoga.booking.domain.subscription.SubscriptionPack.STANDARD;
 import static fr.yoga.booking.util.DateUtil.endOfDay;
 import static fr.yoga.booking.util.DateUtil.startOfDay;
 import static java.time.Instant.now;
@@ -20,6 +21,7 @@ import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.reservation.ScheduledClass;
 import fr.yoga.booking.domain.reservation.StudentRef;
 import fr.yoga.booking.domain.subscription.PeriodCard;
+import fr.yoga.booking.domain.subscription.SubscriptionPack;
 import fr.yoga.booking.domain.subscription.UserSubscriptions;
 import fr.yoga.booking.repository.StudentRepository;
 import fr.yoga.booking.repository.SubscriptionRepository;
@@ -102,13 +104,12 @@ public class SubscriptionService {
 	public UserSubscriptions takePartInClass(Student student, ScheduledClass followedClass) {
 		log.debug("Update subscriptions for '{}' [{}] after start of class '{}' at {} [{}]", student.getDisplayName(), student.getId(), followedClass.getLesson().getInfo().getTitle(), followedClass.getStart(), followedClass.getId());
 		UserSubscriptions current = getSubscriptionsFor(student);
-		if (current.hasValidAnnualCard() || current.hasValidMonthCard()) {
-			return current;
+		if (isStandardPack(followedClass)) {
+			return updateSubscriptionsForStandardPack(current);
 		}
-		current.decreasePaid(1);
-		return subscriptionRepository.save(current);
+		return current;
 	}
-	
+
 
 	public UserSubscriptions getSubscriptionsFor(Student student) {
 		UserSubscriptions subscription = subscriptionRepository.findOneBySubscriberId(student.getId());
@@ -190,6 +191,26 @@ public class SubscriptionService {
 		if (annual != null) {
 			current.setAnnualCard(fullDays(annual));
 		}
+		return subscriptionRepository.save(current);
+	}
+	
+	private boolean isStandardPack(ScheduledClass scheduledClass) {
+		SubscriptionPack pack = scheduledClass.getLesson().getInfo().getSubscriptionPack();
+		// default pack (for old lessons)
+		if (pack == null) {
+			return true;
+		}
+		if (pack == STANDARD) {
+			return true;
+		}
+		return false;
+	}
+	
+	private UserSubscriptions updateSubscriptionsForStandardPack(UserSubscriptions current) {
+		if (current.hasValidAnnualCard() || current.hasValidMonthCard()) {
+			return current;
+		}
+		current.decreasePaid(1);
 		return subscriptionRepository.save(current);
 	}
 
