@@ -3,6 +3,7 @@ package fr.yoga.booking.service.technical.notification;
 import static com.currencyfair.onesignal.model.notification.NotificationRequestBuilder.aNotificationRequest;
 import static fr.yoga.booking.domain.notification.NotificationType.CANCELED;
 import static fr.yoga.booking.domain.notification.NotificationType.FREE_PLACE_AUTOMATICALLY_BOOKED;
+import static fr.yoga.booking.domain.notification.NotificationType.MESSAGE_TO_STUDENT;
 import static fr.yoga.booking.domain.notification.NotificationType.AVAILABLE_PLACE;
 import static fr.yoga.booking.domain.notification.NotificationType.PLACE_CHANGED;
 import static fr.yoga.booking.domain.notification.NotificationType.REMINDER;
@@ -12,6 +13,7 @@ import static fr.yoga.booking.domain.notification.NotificationType.RENEW_MONTH_C
 import static fr.yoga.booking.domain.notification.NotificationType.UNPAID_CLASSES;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.classCanceledConverter;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.freePlaceAutomaticallyBookedConverter;
+import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.messageToStudent;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.availablePlaceConverter;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.placeChangedConverter;
 import static fr.yoga.booking.service.technical.notification.OneSignalNotificationConverters.reminderConverter;
@@ -57,6 +59,7 @@ public class OneSignalPushNotificationService implements PushNotificationService
 		onesignalConverters.put(RENEW_CLASS_PACKAGE_CARD, renewClassPackageCard());
 		onesignalConverters.put(RENEW_MONTH_CARD, renewMonthCard());
 		onesignalConverters.put(RENEW_ANNUAL_CARD, renewAnnualCard());
+		onesignalConverters.put(MESSAGE_TO_STUDENT, messageToStudent());
 	}
 
 	

@@ -6,7 +6,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 
-import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.reservation.Image;
 import fr.yoga.booking.domain.reservation.LessonDifficulty;
 import fr.yoga.booking.domain.reservation.Place;
@@ -23,7 +22,7 @@ public class LessonDto {
 	private List<Image> photos = new ArrayList<>();
 	private Place place;
 	private boolean placeChanged;
-	private Teacher teacher;
+	private TeacherDto teacher;
 	@JsonFormat(shape = Shape.STRING)
 	private SubscriptionPack subscriptionPack;
 }

@@ -4,6 +4,7 @@ import static fr.yoga.booking.domain.account.Role.GOD;
 import static fr.yoga.booking.domain.account.Role.TEACHER;
 import static fr.yoga.booking.util.UserUtils.hasAnyRole;
 import static java.time.Instant.now;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
 import java.time.Instant;
@@ -112,7 +113,7 @@ public class BookingService {
 	public List<Booking> listApprovedBookings(ScheduledClass scheduledClass) {
 		return scheduledClass.sortedByAscendingDateBookings()
 				.stream()
-				.filter(c -> c.isApproved())
+				.filter(Booking::isApproved)
 				.collect(toList());
 	}
 
@@ -120,10 +121,11 @@ public class BookingService {
 	public List<Booking> listWaitingBookings(ScheduledClass scheduledClass) {
 		return scheduledClass.sortedByAscendingDateBookings()
 				.stream()
-				.filter(c -> !c.isApproved())
+				.filter(not(Booking::isApproved))
 				.collect(toList());
 	}
 
+	
 	public ScheduledClass confirm(ScheduledClass bookedClass, StudentRef student, User bookedBy) throws BookingException {
 		return confirmStrategy.confirm(bookedClass, student, bookedBy);
 	}
@@ -138,7 +140,7 @@ public class BookingService {
 		}
 		List<StudentRef> approvedStudents = listApprovedBookings(nextClass)
 				.stream()
-				.map(b -> b.getStudent())
+				.map(Booking::getStudent)
 				.collect(toList());
 		notificationService.reminder(nextClass, approvedStudents);
 	}

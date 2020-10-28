@@ -265,4 +265,9 @@ public class AccessControlService {
 		}
 		return false;
 	}
+
+	public boolean canSendMessageToStudents(User currentUser, ScheduledClass scheduledClass) {
+		// TODO: should also check that the teacher that sends the message is the teacher of the class ?
+		return hasAnyRole(currentUser, GOD, TEACHER);
+	}
 }

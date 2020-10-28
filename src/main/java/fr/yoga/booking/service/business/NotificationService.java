@@ -1,21 +1,27 @@
 package fr.yoga.booking.service.business;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.stereotype.Service;
 
 import fr.sii.ogham.core.exception.MessagingException;
+import fr.sii.ogham.core.message.Message;
+import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.BookedNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
+import fr.yoga.booking.domain.notification.MessageToStudentNotification;
 import fr.yoga.booking.domain.notification.Notification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
 import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
 import fr.yoga.booking.domain.notification.RenewClassPackageCardNotification;
 import fr.yoga.booking.domain.notification.RenewMonthCardNotification;
+import fr.yoga.booking.domain.notification.SendReport;
 import fr.yoga.booking.domain.notification.UnbookedNotification;
 import fr.yoga.booking.domain.notification.UnpaidClassesNotification;
 import fr.yoga.booking.domain.notification.UserPushToken;
@@ -30,6 +36,7 @@ import fr.yoga.booking.service.business.exception.NotificationException;
 import fr.yoga.booking.service.business.exception.UnreachableUserException;
 import fr.yoga.booking.service.business.exception.user.UserException;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterNotificationToken;
+import fr.yoga.booking.service.business.security.annotation.CanSendMessageToStudents;
 import fr.yoga.booking.service.business.security.annotation.CanUnregisterNotificationToken;
 import fr.yoga.booking.service.technical.notification.PushNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -122,39 +129,56 @@ public class NotificationService {
 		StudentRef student = subscription.getSubscriber();
 		notify(student, new RenewAnnualCardNotification(subscription));
 	}
+	
+	@CanSendMessageToStudents
+	public List<SendReport> sendMessageToApprovedStudents(String message, ScheduledClass scheduledClass) {
+		Teacher sender = scheduledClass.getLesson().getTeacher();
+		List<SendReport> reports = new ArrayList<>();
+		for (StudentRef student : scheduledClass.approvedStudents()) {
+			reports.add(notify(student, new MessageToStudentNotification(sender, student, message)));
+		}
+		return reports;
+	}
 
-	private void notify(StudentRef student, Notification notification) {
+	private SendReport notify(StudentRef student, Notification notification) {
+		SendReport report = new SendReport(student, notification);
 		if(canReceivePushNotification(student)) {
-			tryPushAndFallbackToEmailOrSms(student, notification);
+			tryPushAndFallbackToEmailOrSms(student, notification, report);
 		}
 		if(!canReceivePushNotification(student) || shouldAlsoReceiveUsingOtherMeansOfCommunication(student, notification)) {
-			tryEmailOrSms(student, notification);
+			tryEmailOrSms(student, notification, report);
 		}
+		return report;
 	}
 
-	private void tryPushAndFallbackToEmailOrSms(StudentRef student, Notification notification) {
+	private void tryPushAndFallbackToEmailOrSms(StudentRef student, Notification notification, SendReport report) {
 		try {
 			sendPushNotification(student, notification);
+			report.markPushNotificationSent();
 		} catch(NotificationException | UserException e) {
 			log.error("Failed to send push notification to {}", student.getDisplayName(), e);
-			// TODO: handle correctly errors
-			tryEmailOrSms(student, notification);
+			report.markPushNotificationFailed(e);
+			tryEmailOrSms(student, notification, report);
 		}
 	}
 
-	private void tryEmailOrSms(StudentRef student, Notification notification) {
+	private void tryEmailOrSms(StudentRef student, Notification notification, SendReport report) {
 		try {
-			contactService.sendMessage(userService.getRegisteredStudent(student), notification);
+			Message sent = contactService.sendMessage(userService.getRegisteredStudent(student), notification).get();
+			report.markSent(sent);
 		} catch (MessagingException e) {
 			log.error("Failed to send email/sms to {}", student.getDisplayName(), e);
-			// TODO: handle correctly errors
+			report.markEmailAndSmsFailed(e);
 		} catch (UnreachableUserException e) {
 			log.warn("User {} is unreachable (neither phone number nor email provided)", student.getDisplayName());
 			log.trace("{}", e.getMessage(), e);
-			// TODO: handle correctly errors
+			report.markEmailAndSmsFailed(e);
+		} catch (ExecutionException e) {
+			log.error("Failed to notify {} due to unexpected error", student.getDisplayName(), e);
+			report.markEmailAndSmsFailed(e.getCause());
 		} catch (Exception e) {
 			log.error("Failed to notify {} due to unexpected error", student.getDisplayName(), e);
-			// TODO: handle correctly errors
+			report.markEmailAndSmsFailed(e);
 		}
 	}
 

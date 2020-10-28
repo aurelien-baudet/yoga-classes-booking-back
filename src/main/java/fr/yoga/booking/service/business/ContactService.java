@@ -1,5 +1,9 @@
 package fr.yoga.booking.service.business;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +28,13 @@ public class ContactService {
 	private final MessagingService messagingService;
 
 	@Async
-	public void sendMessage(Student student, Notification notification) throws MessagingException, UnreachableUserException, UserException {
+	public CompletableFuture<Message> sendMessage(Student student, Notification notification) throws MessagingException, UnreachableUserException, UserException {
 		Message message = prepareMessage(student, notification);
 		if(message == null) {
 			throw new UnreachableUserException(student, notification);
 		}
 		messagingService.send(message);
+		return completedFuture(message);
 	}
 
 	@Async
@@ -96,6 +101,7 @@ public class ContactService {
 	private boolean isEmail(String str) {
 		return str.contains("@");
 	}
+
 
 	@Data
 	public static class PasswordReset {

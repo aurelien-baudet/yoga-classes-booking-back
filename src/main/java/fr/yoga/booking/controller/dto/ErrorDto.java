@@ -16,7 +16,7 @@ public class ErrorDto {
 	private final Instant timestamp;
 	private final Map<String, Object> data;
 	
-	public ErrorDto(String code, Exception e) {
+	public ErrorDto(String code, Throwable e) {
 		this(code, e.getMessage(), Instant.now(), new HashMap<>());
 	}
 	

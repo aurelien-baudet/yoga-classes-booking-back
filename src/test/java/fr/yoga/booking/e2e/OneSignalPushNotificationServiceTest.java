@@ -29,6 +29,7 @@ import fr.yoga.booking.domain.account.User;
 import fr.yoga.booking.domain.notification.AvailablePlaceNotification;
 import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
+import fr.yoga.booking.domain.notification.MessageToStudentNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
 import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
@@ -177,5 +178,10 @@ public class OneSignalPushNotificationServiceTest {
 	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
 	public void renewAnnualCard() throws MessagingException, UnreachableUserException, NotificationException {
 		onesignalService.sendPushNotification(user, token, new RenewAnnualCardNotification(subscription));
+	}
+	@Test
+	@EnabledIf("#{systemProperties['onesignal.api-key'] != null && systemProperties['onesignal.app-id'] != null}")
+	public void messageToStudent() throws MessagingException, UnreachableUserException, NotificationException {
+		onesignalService.sendPushNotification(user, token, new MessageToStudentNotification(teacher, studentRef, "contenu du message\navec retour à la ligne"));
 	}
 }

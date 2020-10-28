@@ -1,6 +1,5 @@
 package fr.yoga.booking.service.technical.notification;
 
-import static fr.yoga.booking.util.DateUtil.formatDate;
 import static fr.yoga.booking.util.ExpressionParser.evaluate;
 
 import java.io.UnsupportedEncodingException;
@@ -13,8 +12,6 @@ import fr.yoga.booking.domain.notification.ClassCanceledNotification;
 import fr.yoga.booking.domain.notification.FreePlaceBookedNotification;
 import fr.yoga.booking.domain.notification.PlaceChangedNotification;
 import fr.yoga.booking.domain.notification.ReminderNotification;
-import fr.yoga.booking.domain.notification.RenewAnnualCardNotification;
-import fr.yoga.booking.domain.notification.RenewMonthCardNotification;
 import fr.yoga.booking.domain.reservation.Place;
 
 public class OneSignalNotificationConverters {
@@ -148,7 +145,7 @@ public class OneSignalNotificationConverters {
 		return (notification, builder) -> {
 			return builder
 				.withHeading("en", evaluate("💲 Renouvellement d'abonnement", notification))
-				.withContent("en", evaluate("Ton abonnement mensuel se termine le "+formatDate(((RenewMonthCardNotification) notification).getSubscription().getMonthCard().getEnd())+".\n"
+				.withContent("en", evaluate("Ton abonnement mensuel se termine le ${T(fr.yoga.booking.util.DateUtil).formatDate(subscription.monthCard.end)}.\n"
 						+ "\n"
 						+ "Pense à le renouveller si tu souhaites continuer les cours de Yoga.\n"
 						+ "Tu peux également voir avec Cyril pour prendre un autre abonnement.\n"
@@ -162,12 +159,21 @@ public class OneSignalNotificationConverters {
 		return (notification, builder) -> {
 			return builder
 				.withHeading("en", evaluate("💲 Renouvellement d'abonnement", notification))
-				.withContent("en", evaluate("Ton abonnement annuel se termine le "+formatDate(((RenewAnnualCardNotification) notification).getSubscription().getAnnualCard().getEnd())+".\n"
+				.withContent("en", evaluate("Ton abonnement annuel se termine le ${T(fr.yoga.booking.util.DateUtil).formatDate(subscription.annualCard.end)}.\n"
 						+ "\n"
 						+ "Pense à le renouveller si tu souhaites continuer les cours de Yoga.\n"
 						+ "Tu peux également voir avec Cyril pour prendre un autre abonnement.\n"
 						+ "\n"
 						+ "Merci", notification))
+				.build();
+		};
+	}
+
+	public static OneSignalNotificationConverter messageToStudent() {
+		return (notification, builder) -> {
+			return builder
+				.withHeading("en", evaluate("Message de ${sender.displayName}", notification))
+				.withContent("en", evaluate("${message}", notification))
 				.build();
 		};
 	}
