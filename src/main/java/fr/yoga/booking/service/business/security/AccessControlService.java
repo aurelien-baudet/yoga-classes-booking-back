@@ -270,4 +270,8 @@ public class AccessControlService {
 		// TODO: should also check that the teacher that sends the message is the teacher of the class ?
 		return hasAnyRole(currentUser, GOD, TEACHER);
 	}
+	
+	public boolean canListTeachers(User currentUser) {
+		return true;
+	}	
 }

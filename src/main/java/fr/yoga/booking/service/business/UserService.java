@@ -34,6 +34,7 @@ import fr.yoga.booking.service.business.exception.user.UserNotFoundException;
 import fr.yoga.booking.service.business.security.annotation.CanChangePasswordForStudent;
 import fr.yoga.booking.service.business.security.annotation.CanChangePasswordForTeacher;
 import fr.yoga.booking.service.business.security.annotation.CanCheckLoginAvailability;
+import fr.yoga.booking.service.business.security.annotation.CanListTeachers;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterStudent;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterTeacher;
 import fr.yoga.booking.service.business.security.annotation.CanViewStudentInfo;
@@ -264,7 +265,12 @@ public class UserService {
 	public void changePassword(Teacher teacher, String newPassword) throws PasswordResetException {
 		changePassword(teacher, newPassword, teacherRepository);
 	}
-	
+
+	@CanListTeachers
+	public List<Teacher> listTeachers() {
+		return teacherRepository.findAll();
+	}
+
 	private <T extends User> void changePassword(T user, String newPassword, MongoRepository<T, String> repository) {
 		user.getAccount().setPassword(passwordService.encodePassword(newPassword));
 		repository.save(user);

@@ -17,6 +17,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString(exclude = "password")
 public class Account {
+	@JsonIgnore()
 	private String login;
 	@JsonIgnore()
 	private String password;
@@ -28,6 +29,11 @@ public class Account {
 	
 	public Account(String login, String password, Role role) {
 		this(login, password, new HashSet<>(asList(role)));
+	}
+	
+	@JsonIgnore(false)
+	public void setLogin(String login) {
+		this.login = login;
 	}
 	
 	@JsonIgnore(false)

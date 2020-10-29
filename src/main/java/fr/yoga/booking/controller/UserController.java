@@ -1,5 +1,7 @@
 package fr.yoga.booking.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,5 +61,10 @@ public class UserController {
 	@PostMapping("teachers")
 	public Teacher regiterTeacher(@RequestBody NewTeacher newTeacher) throws AccountException {
 		return userService.registerTeacher(newTeacher.getDisplayName(), newTeacher.getCredentials(), newTeacher.getContact());
+	}
+
+	@GetMapping("teachers")
+	public List<Teacher> listTeachers() {
+		return userService.listTeachers();
 	}
 }
