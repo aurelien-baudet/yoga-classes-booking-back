@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.yoga.booking.controller.dto.NewStudent;
 import fr.yoga.booking.controller.dto.NewTeacher;
 import fr.yoga.booking.controller.dto.NewUnregisteredUser;
+import fr.yoga.booking.controller.dto.Profile;
 import fr.yoga.booking.domain.account.Student;
 import fr.yoga.booking.domain.account.Teacher;
 import fr.yoga.booking.domain.account.UnregisteredUser;
@@ -66,5 +68,10 @@ public class UserController {
 	@GetMapping("teachers")
 	public List<Teacher> listTeachers() {
 		return userService.listTeachers();
+	}
+
+	@PatchMapping("students/{studentId}")
+	public Student updateProfile(@PathVariable String studentId, @RequestBody Profile profile) throws UserException {
+		return userService.updateProfile(userService.getRegisteredStudent(studentId), profile.getDisplayName(), profile.getContact());
 	}
 }

@@ -287,5 +287,17 @@ public class AccessControlService {
 	
 	public boolean canListTeachers(User currentUser) {
 		return true;
-	}	
+	}
+	
+	public boolean canUpdateProfile(User currentUser, Student student) {
+		if(hasAnyRole(currentUser, GOD)) {
+			return true;
+		}
+		// can update his own profile
+		if(isSameUser(currentUser, student)) {
+			return true;
+		}
+		return false;
+	}
+
 }

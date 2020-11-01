@@ -37,6 +37,7 @@ import fr.yoga.booking.service.business.security.annotation.CanCheckLoginAvailab
 import fr.yoga.booking.service.business.security.annotation.CanListTeachers;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterStudent;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterTeacher;
+import fr.yoga.booking.service.business.security.annotation.CanUpdateProfile;
 import fr.yoga.booking.service.business.security.annotation.CanViewStudentInfo;
 import fr.yoga.booking.service.business.security.annotation.CanViewTeacherInfo;
 import fr.yoga.booking.service.business.security.annotation.CanViewUserInfo;
@@ -269,6 +270,13 @@ public class UserService {
 	@CanListTeachers
 	public List<Teacher> listTeachers() {
 		return teacherRepository.findAll();
+	}
+	
+	@CanUpdateProfile
+	public Student updateProfile(Student student, String displayName, ContactInfo contact) {
+		student.setDisplayName(displayName);
+		student.setContact(contact);
+		return studentRepository.save(student);
 	}
 
 	private <T extends User> void changePassword(T user, String newPassword, MongoRepository<T, String> repository) {

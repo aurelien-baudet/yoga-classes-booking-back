@@ -2,6 +2,7 @@ package fr.yoga.booking.config;
 
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.HEAD;
 import static org.springframework.http.HttpMethod.POST;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,7 @@ public class SecurityConfig {
 					.antMatchers(GET, "/users").permitAll()
 					.antMatchers(GET, "/users/*").permitAll()
 					.antMatchers(POST, "/users/students").permitAll()
+					.antMatchers(HEAD, "/users/students").permitAll()
 					.antMatchers(GET, "/users/teachers").permitAll()
 					.antMatchers(POST, "/users/teachers").permitAll()
 					.antMatchers(POST, "/users/unregistered").permitAll()
