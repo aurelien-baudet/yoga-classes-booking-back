@@ -25,6 +25,7 @@ import fr.yoga.booking.service.business.PlaceService;
 import fr.yoga.booking.service.business.UserService;
 import fr.yoga.booking.service.business.exception.PlaceException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassException;
+import fr.yoga.booking.service.business.exception.user.UserException;
 
 @RestController
 @RequestMapping("classes")
@@ -68,6 +69,11 @@ public class ClassController {
 	@PatchMapping("{classId}/lesson/info")
 	public ScheduledClassDto updateLessonInfo(@PathVariable("classId") String classId, @RequestBody LessonInfo newInfo) throws ScheduledClassException, PlaceException {
 		return classMapper.toDto(classService.updateLessonInfoForSpecificClass(classService.getClass(classId), newInfo));
+	}
+
+	@PatchMapping("{classId}/teachers/{newTeacherId}")
+	public ScheduledClassDto cheangeTeacher(@PathVariable("classId") String classId, @PathVariable("newTeacherId") String newTeacherId) throws ScheduledClassException, UserException {
+		return classMapper.toDto(classService.changeTeacher(classService.getClass(classId), userService.getTeacher(newTeacherId)));
 	}
 
 	private Instant toInstant(LocalDate date) {

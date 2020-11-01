@@ -78,4 +78,9 @@ public class LessonController {
 	public LessonDto updateLessonInfo(@PathVariable("lessonId") String lessonId, @RequestBody LessonInfo newInfo) throws ScheduledClassException {
 		return lessonMapper.toDto(classService.updateLessonForAllClasses(classService.getLesson(lessonId), newInfo));
 	}
+
+	@PatchMapping("{lessonId}/teachers/{newTeacherId}")
+	public LessonDto changeTeacher(@PathVariable("lessonId") String lessonId, @PathVariable("newTeacherId") String newTeacherId) throws ScheduledClassException, UserException {
+		return lessonMapper.toDto(classService.updateTeacherForAllClasses(classService.getLesson(lessonId), userService.getTeacher(newTeacherId)));
+	}
 }

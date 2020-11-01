@@ -30,7 +30,9 @@ import fr.yoga.booking.service.business.exception.reservation.ScheduledClassExce
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassNotFoundException;
 import fr.yoga.booking.service.business.security.annotation.CanCancelClass;
 import fr.yoga.booking.service.business.security.annotation.CanChangeAllPlaces;
+import fr.yoga.booking.service.business.security.annotation.CanChangeAllTeachers;
 import fr.yoga.booking.service.business.security.annotation.CanChangePlace;
+import fr.yoga.booking.service.business.security.annotation.CanChangeTeacher;
 import fr.yoga.booking.service.business.security.annotation.CanListClassesForLesson;
 import fr.yoga.booking.service.business.security.annotation.CanListFutureClasses;
 import fr.yoga.booking.service.business.security.annotation.CanListLessons;
@@ -119,6 +121,13 @@ public class ClassService {
 		return updated;
 	}
 
+	@CanChangeTeacher
+	public ScheduledClass changeTeacher(ScheduledClass scheduledClass, Teacher teacher) {
+		Lesson lesson = scheduledClass.getLesson();
+		lesson.setTeacher(teacher);
+		return scheduledClassRepository.save(scheduledClass);
+	}
+
 	@CanListClassesForLesson
 	public List<ScheduledClass> listClassesFor(Lesson lesson, Instant from, Instant to) {
 		return scheduledClassRepository.findByLessonAndStartAfterAndEndBefore(lesson, Optional.ofNullable(from), Optional.ofNullable(to));
@@ -161,6 +170,17 @@ public class ClassService {
 		List<ScheduledClass> classesForLesson = scheduledClassRepository.findByLessonAndStartAfter(updated, Optional.of(Instant.now()));
 		for(ScheduledClass classForLesson : classesForLesson) {
 			changePlace(classForLesson, newPlace);
+		}
+		return updated;
+	}
+	
+	@CanChangeAllTeachers
+	public Lesson updateTeacherForAllClasses(Lesson lesson, Teacher teacher) throws ScheduledClassException {
+		lesson.setTeacher(teacher);
+		Lesson updated = lessonRepository.save(lesson);
+		List<ScheduledClass> classesForLesson = scheduledClassRepository.findByLessonAndStartAfter(updated, Optional.of(Instant.now()));
+		for(ScheduledClass classForLesson : classesForLesson) {
+			changeTeacher(classForLesson, teacher);
 		}
 		return updated;
 	}

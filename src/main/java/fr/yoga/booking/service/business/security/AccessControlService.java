@@ -112,7 +112,7 @@ public class AccessControlService {
 	public boolean canViewPlace(User currentUser, String placeId) {
 		return true;
 	}
-	
+
 	public boolean canChangePlace(User currentUser, ScheduledClass scheduledClass) {
 		if(hasAnyRole(currentUser, GOD, TEACHER)) {
 			return true;
@@ -120,12 +120,26 @@ public class AccessControlService {
 		// TODO: is any teacher can change place for a class of another teacher ?
 		return false;
 	}
-	
+
 	public boolean canChangeAllPlaces(User currentUser, Lesson lesson) {
 		if(hasAnyRole(currentUser, GOD, TEACHER)) {
 			return true;
 		}
 		// TODO: is any teacher can change place for a class of another teacher ?
+		return false;
+	}
+
+	public boolean canChangeTeacher(User currentUser, ScheduledClass scheduledClass) {
+		if(hasAnyRole(currentUser, GOD, TEACHER)) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean canChangeAllTeachers(User currentUser, Lesson lesson) {
+		if(hasAnyRole(currentUser, GOD, TEACHER)) {
+			return true;
+		}
 		return false;
 	}
 	
