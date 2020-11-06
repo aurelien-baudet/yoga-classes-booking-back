@@ -174,7 +174,7 @@ public class SubscriptionService {
 			notificationService.renewMonthCard(upToDate);
 			return;
 		}
-		if (isNotEnoughRemainingClasses(upToDate) && upToDate.getRemainingClasses() < 0) {
+		if (isNotEnoughRemainingClasses(upToDate) && upToDate.getRemainingClasses() >= 0) {
 			notificationService.renewClassPackageCard(upToDate);
 			return;
 		}
