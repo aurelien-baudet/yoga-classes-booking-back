@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.yoga.booking.controller.dto.UpdatedSubscription;
@@ -31,8 +32,8 @@ public class SubscriptionController {
 	}
 	
 	@GetMapping
-	public Page<UserSubscriptions> getSubscriptionsForAllStudents(Pageable page) {
-		return subscriptionService.getSubscriptionsForAllStudents(page);
+	public Page<UserSubscriptions> getSubscriptionsForAllStudents(@RequestParam(required=false) String displayName, Pageable page) {
+		return subscriptionService.getSubscriptionsForAllStudents(displayName, page);
 	}
 	
 	@PostMapping("{studentId}")

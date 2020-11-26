@@ -73,8 +73,8 @@ public class SubscriptionService {
 	}
 	
 	@CanListSubscriptions
-	public Page<UserSubscriptions> getSubscriptionsForAllStudents(Pageable page) {
-		Page<Student> students = studentRepository.findAll(page);
+	public Page<UserSubscriptions> getSubscriptionsForAllStudents(String name, Pageable page) {
+		Page<Student> students = name==null ? studentRepository.findAll(page) : studentRepository.findAllByDisplayNameContaining(name, page);
 		List<UserSubscriptions> subscriptionsPerStudent = students.getContent().stream()
 				.map(this::getSubscriptionsFor)
 				.collect(toList());
