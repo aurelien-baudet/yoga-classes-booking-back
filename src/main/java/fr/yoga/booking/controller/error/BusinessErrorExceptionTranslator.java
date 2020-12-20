@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import fr.yoga.booking.controller.dto.ErrorDto;
 import fr.yoga.booking.service.business.exception.AlreadyRegisteredUser;
 import fr.yoga.booking.service.business.exception.reservation.AlreadyBookedException;
+import fr.yoga.booking.service.business.exception.reservation.CantRemoveClassWithBookersException;
 import fr.yoga.booking.service.business.exception.reservation.NotBookedException;
 import fr.yoga.booking.service.business.exception.reservation.PlaceAlreadyTakenBySomeoneElseException;
 import fr.yoga.booking.service.business.exception.reservation.PlaceAlreadyTakenException;
@@ -82,5 +83,12 @@ public class BusinessErrorExceptionTranslator {
 		return new ErrorDto("TOO_LATE_TO_UNBOOK", e)
 				.addData("classId", e.getBookedClass().getId())
 				.addData("studentId", e.getStudent().getId());
+	}
+	
+	@ExceptionHandler(CantRemoveClassWithBookersException.class)
+	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+	public ErrorDto expired(CantRemoveClassWithBookersException e) {
+		return new ErrorDto("CANT_REMOVE_CLASS_WITH_BOOKERS", e)
+				.addData("classId", e.getScheduledClass().getId());
 	}
 }

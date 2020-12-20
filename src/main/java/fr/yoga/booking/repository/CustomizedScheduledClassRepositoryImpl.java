@@ -30,7 +30,8 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 	public List<ScheduledClass> findNextBookedClassesForStudent(StudentRef student) {
 		Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
 		Criteria where = where("start").gte(today)
-				.and("bookings").elemMatch(userCriteria(student));
+				.and("bookings").elemMatch(userCriteria(student))
+				.and("removed").ne(true);
 		return mongo.find(query(where), ScheduledClass.class);
 	}
 	
@@ -47,7 +48,8 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 	@Override
 	public ScheduledClass findNextBookedClassForStudent(StudentRef student) {
 		Criteria where = where("start").gte(Instant.now())
-				.and("bookings").elemMatch(userCriteria(student));
+				.and("bookings").elemMatch(userCriteria(student))
+				.and("removed").ne(true);
 		return mongo.findOne(query(where).with(Sort.by(asc("start"))).limit(1), ScheduledClass.class);
 	}
 
@@ -64,7 +66,8 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 	@Override
 	public boolean existsBookedClassForStudent(ScheduledClass bookedClass, StudentRef student) {
 		Criteria where = where("_id").is(bookedClass.getId())
-				.and("bookings").elemMatch(userCriteria(student));
+				.and("bookings").elemMatch(userCriteria(student))
+				.and("removed").ne(true);
 		return mongo.exists(query(where), ScheduledClass.class);
 	}
 
@@ -80,7 +83,8 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 
 	@Override
 	public List<ScheduledClass> findByLessonAndStartAfter(Lesson lesson, Optional<Instant> start) {
-		Criteria where = where("lesson._id").is(lesson.getId());
+		Criteria where = where("lesson._id").is(lesson.getId())
+				.and("removed").ne(true);
 		if(start.isPresent()) {
 			where = where.and("start").gte(start.get());
 		}
@@ -89,7 +93,8 @@ public class CustomizedScheduledClassRepositoryImpl implements CustomizedSchedul
 
 	@Override
 	public List<ScheduledClass> findByLessonAndStartAfterAndEndBefore(Lesson lesson, Optional<Instant> start, Optional<Instant> end) {
-		Criteria where = where("lesson._id").is(lesson.getId());
+		Criteria where = where("lesson._id").is(lesson.getId())
+				.and("removed").ne(true);
 		if(start.isPresent()) {
 			where = where.and("start").gte(start.get());
 		}

@@ -22,12 +22,12 @@ public class CustomizedLessonRepositoryImpl implements CustomizedLessonRepositor
 	
 
 	@Override
-	public List<Lesson> findAllUnscheduled() {
+	public List<Lesson> findAllUnscheduledAndRemovedFalse() {
 		List<String> scheduledIds = mongo.findDistinct("lesson._id", ScheduledClass.class, ObjectId.class)
 				.stream()
 				.map(ObjectId::toHexString)
 				.collect(toList());
-		Criteria where = where("_id").nin(scheduledIds);
+		Criteria where = where("_id").nin(scheduledIds).and("removed").ne(true);
 		return mongo.find(query(where), Lesson.class);
 	}
 

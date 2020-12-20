@@ -27,13 +27,14 @@ public class ScheduledClass {
 	private Lesson lesson;
 	private ClassState state;
 	private List<Booking> bookings;
+	private boolean removed;
 	
 	public ScheduledClass() {
-		this(null, null, null, null, new Opened(), new ArrayList<>());
+		this(null, null, null, null, new Opened(), new ArrayList<>(), false);
 	}
 	
 	public ScheduledClass(Instant start, Instant end, Lesson lesson) {
-		this(null, start, end, lesson, new Opened(), new ArrayList<>());
+		this(null, start, end, lesson, new Opened(), new ArrayList<>(), false);
 	}
 
 	

@@ -27,6 +27,7 @@ import fr.yoga.booking.repository.LessonRepository;
 import fr.yoga.booking.repository.ScheduledClassRepository;
 import fr.yoga.booking.service.business.exception.LessonNotFoundException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassException;
+import fr.yoga.booking.service.business.exception.reservation.CantRemoveClassWithBookersException;
 import fr.yoga.booking.service.business.exception.reservation.ScheduledClassNotFoundException;
 import fr.yoga.booking.service.business.security.annotation.CanCancelClass;
 import fr.yoga.booking.service.business.security.annotation.CanChangeAllPlaces;
@@ -38,6 +39,8 @@ import fr.yoga.booking.service.business.security.annotation.CanListFutureClasses
 import fr.yoga.booking.service.business.security.annotation.CanListLessons;
 import fr.yoga.booking.service.business.security.annotation.CanListUnscheduledLessons;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterLesson;
+import fr.yoga.booking.service.business.security.annotation.CanRemoveClass;
+import fr.yoga.booking.service.business.security.annotation.CanRemoveLesson;
 import fr.yoga.booking.service.business.security.annotation.CanScheduleClass;
 import fr.yoga.booking.service.business.security.annotation.CanUpdateLessonInfo;
 import fr.yoga.booking.service.business.security.annotation.CanViewClassInfo;
@@ -105,7 +108,7 @@ public class ClassService {
 	@CanListFutureClasses
 	public List<ScheduledClass> listFutureClasses() {
 		Instant today = Instant.now().truncatedTo(DAYS);
-		return scheduledClassRepository.findByStartAfter(today, Sort.by(asc("start")));
+		return scheduledClassRepository.findByStartAfterAndRemovedFalse(today, Sort.by(asc("start")));
 	}
 	
 	@CanChangePlace
@@ -135,12 +138,12 @@ public class ClassService {
 
 	@CanListLessons
 	public List<Lesson> listLessons() {
-		return lessonRepository.findAll();
+		return lessonRepository.findByRemovedIsNullOrRemovedFalse();
 	}
 
 	@CanListUnscheduledLessons
 	public List<Lesson> listUnscheduledLessons() {
-		return lessonRepository.findAllUnscheduled();
+		return lessonRepository.findAllUnscheduledAndRemovedFalse();
 	}
 
 	@CanUpdateLessonInfo
@@ -185,6 +188,21 @@ public class ClassService {
 		return updated;
 	}
 	
+	@CanRemoveLesson
+	public void removeLesson(Lesson lesson) {
+		lesson.setRemoved(true);
+		lessonRepository.save(lesson);
+	}
+	
+	@CanRemoveClass
+	public void removeClass(ScheduledClass scheduledClass) throws ScheduledClassException {
+		if (!scheduledClass.getBookings().isEmpty()) {
+			throw new CantRemoveClassWithBookersException(scheduledClass);
+		}
+		scheduledClass.setRemoved(true);
+		scheduledClassRepository.save(scheduledClass);
+	}
+	
 	private ScheduledClass scheduleEvents(ScheduledClass scheduledClass) {
 		if (!schedulingProperties.isEnableClassEvents()) {
 			return scheduledClass;
@@ -209,7 +227,7 @@ public class ClassService {
 		Set<ScheduledClass> merged = new HashSet<>();
 		addScheduledClassesAfter(latestStartTriggered, merged);
 		addScheduledClassesAfter(latestEndTriggered, merged);
-		List<ScheduledClass> futureClasses = scheduledClassRepository.findByStartAfter(now(), Sort.by(asc("start")));
+		List<ScheduledClass> futureClasses = scheduledClassRepository.findByStartAfterAndRemovedFalse(now(), Sort.by(asc("start")));
 		merged.addAll(futureClasses);
 		return merged;
 	}
@@ -223,7 +241,7 @@ public class ClassService {
 		if (associatedClass == null) {
 			return;
 		}
-		merged.addAll(scheduledClassRepository.findByStartAfter(associatedClass.getStart(), Sort.by(asc("start"))));
+		merged.addAll(scheduledClassRepository.findByStartAfterAndRemovedFalse(associatedClass.getStart(), Sort.by(asc("start"))));
 	}
 
 	private Runnable triggerStartEvent(ScheduledClass scheduledClass) {

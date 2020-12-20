@@ -19,8 +19,9 @@ public class Lesson {
 	private Place place;
 	private Teacher teacher;
 	private boolean placeChanged;
+	private boolean removed;
 	
 	public Lesson(LessonInfo info, Place place, Teacher teacher) {
-		this(null, info, place, teacher, false);
+		this(null, info, place, teacher, false, false);
 	}
 }

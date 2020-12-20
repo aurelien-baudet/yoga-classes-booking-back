@@ -299,5 +299,19 @@ public class AccessControlService {
 		}
 		return false;
 	}
+	
+	public boolean canRemoveLesson(User currentUser, Lesson lesson) {
+		if(hasAnyRole(currentUser, GOD, TEACHER)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean canRemoveClass(User currentUser, ScheduledClass scheduledClass) {
+		if(hasAnyRole(currentUser, GOD, TEACHER)) {
+			return true;
+		}
+		return false;
+	}
 
 }

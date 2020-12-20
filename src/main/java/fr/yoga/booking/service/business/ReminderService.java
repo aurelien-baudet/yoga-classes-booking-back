@@ -47,7 +47,7 @@ public class ReminderService {
 	}
 
 	private List<ScheduledClass> findFutureClasses() {
-		return classesRepository.findByStartAfter(now(), Sort.by(asc("start")));
+		return classesRepository.findByStartAfterAndRemovedFalse(now(), Sort.by(asc("start")));
 	}
 
 	private List<Trigger<ScheduledClass>> toReminders(ScheduledClass scheduledClass) {

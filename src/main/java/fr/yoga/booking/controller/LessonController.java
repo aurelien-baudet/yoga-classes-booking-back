@@ -3,6 +3,7 @@ package fr.yoga.booking.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -82,5 +83,10 @@ public class LessonController {
 	@PatchMapping("{lessonId}/teachers/{newTeacherId}")
 	public LessonDto changeTeacher(@PathVariable("lessonId") String lessonId, @PathVariable("newTeacherId") String newTeacherId) throws ScheduledClassException, UserException {
 		return lessonMapper.toDto(classService.updateTeacherForAllClasses(classService.getLesson(lessonId), userService.getTeacher(newTeacherId)));
+	}
+
+	@DeleteMapping("{lessonId}")
+	public void removeLesson(@PathVariable("lessonId") String lessonId) throws ScheduledClassException {
+		classService.removeLesson(classService.getLesson(lessonId));
 	}
 }
