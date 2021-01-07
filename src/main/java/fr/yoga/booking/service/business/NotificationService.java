@@ -38,6 +38,8 @@ import fr.yoga.booking.service.business.exception.user.UserException;
 import fr.yoga.booking.service.business.security.annotation.CanRegisterNotificationToken;
 import fr.yoga.booking.service.business.security.annotation.CanSendMessageToStudents;
 import fr.yoga.booking.service.business.security.annotation.CanUnregisterNotificationToken;
+import fr.yoga.booking.service.technical.error.UnmanagedError;
+import fr.yoga.booking.service.technical.error.UnmanagedErrorRepository;
 import fr.yoga.booking.service.technical.notification.PushNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,7 @@ public class NotificationService {
 	private final UserService userService;
 	private final PushNotificationService pushService;
 	private final ContactService contactService;
+	private final UnmanagedErrorRepository errorRepository;
 	
 	@CanRegisterNotificationToken
 	public void registerNotificationTokenForUser(User user, String token) {
@@ -169,16 +172,20 @@ public class NotificationService {
 		} catch (MessagingException e) {
 			log.error("Failed to send email/sms to {}", student.getDisplayName(), e);
 			report.markEmailAndSmsFailed(e);
+			errorRepository.save(new UnmanagedError("tryEmailOrSms:sendMessage(student="+student.getId()+", notification="+notification.getType()+")", e));
 		} catch (UnreachableUserException e) {
 			log.warn("User {} is unreachable (neither phone number nor email provided)", student.getDisplayName());
 			log.trace("{}", e.getMessage(), e);
 			report.markEmailAndSmsFailed(e);
+			errorRepository.save(new UnmanagedError("tryEmailOrSms:sendMessage(student="+student.getId()+", notification="+notification.getType()+")", e));
 		} catch (ExecutionException e) {
 			log.error("Failed to notify {} due to unexpected error", student.getDisplayName(), e);
 			report.markEmailAndSmsFailed(e.getCause());
+			errorRepository.save(new UnmanagedError("tryEmailOrSms:sendMessage(student="+student.getId()+", notification="+notification.getType()+")", e));
 		} catch (Exception e) {
 			log.error("Failed to notify {} due to unexpected error", student.getDisplayName(), e);
 			report.markEmailAndSmsFailed(e);
+			errorRepository.save(new UnmanagedError("tryEmailOrSms:sendMessage(student="+student.getId()+", notification="+notification.getType()+")", e));
 		}
 	}
 

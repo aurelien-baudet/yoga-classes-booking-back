@@ -41,6 +41,8 @@ import fr.yoga.booking.service.business.security.annotation.CanUpdateProfile;
 import fr.yoga.booking.service.business.security.annotation.CanViewStudentInfo;
 import fr.yoga.booking.service.business.security.annotation.CanViewTeacherInfo;
 import fr.yoga.booking.service.business.security.annotation.CanViewUserInfo;
+import fr.yoga.booking.service.technical.error.UnmanagedError;
+import fr.yoga.booking.service.technical.error.UnmanagedErrorRepository;
 import fr.yoga.booking.service.technical.security.PasswordService;
 import fr.yoga.booking.service.technical.security.TokenService;
 import fr.yoga.booking.service.technical.security.UserDetailsWrapper;
@@ -57,6 +59,7 @@ public class UserService {
 	private final PasswordService passwordService;
 	private final TokenService tokenService;
 	private final ContactService contactService;
+	private final UnmanagedErrorRepository errorRepository;
 	
 	@CanViewUserInfo
 	public User getUserInfo(String userId) throws UserException {
@@ -204,6 +207,7 @@ public class UserService {
 				contactService.sendResetPasswordMessage(student, emailOrPhoneNumber, token);
 			} catch (MessagingException e) {
 				log.error("Failed to send message to reset password", e);
+				errorRepository.save(new UnmanagedError("requestPasswordReset:sendResetPasswordMessage(student="+student.getId()+", emailOrPhoneNumber="+emailOrPhoneNumber+")", e));
 			}
 		}
 		// If there are matching students, do not even try to send message to teacher.
@@ -221,6 +225,7 @@ public class UserService {
 				contactService.sendResetPasswordMessage(teacher, emailOrPhoneNumber, token);
 			} catch (MessagingException e) {
 				log.error("Failed to send message to reset password", e);
+				errorRepository.save(new UnmanagedError("requestPasswordReset:sendResetPasswordMessage(teacher="+teacher.getId()+", emailOrPhoneNumber="+emailOrPhoneNumber+")", e));
 			}
 		}
 	}
