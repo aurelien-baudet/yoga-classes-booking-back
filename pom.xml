@@ -17,25 +17,11 @@
 
 	<properties>
 		<java.version>11</java.version>
-		<ogham.version>3.0.0-SNAPSHOT</ogham.version>
+		<ogham.version>3.0.0</ogham.version>
 		<mapstruct.version>1.4.1.Final</mapstruct.version>
 		<onesignal.version>1.0.15</onesignal.version>
 		<sass-maven-plugin.version>3.7.2</sass-maven-plugin.version>
 	</properties>
-
-	<!-- FIXME: remove -->
-	<repositories>
-		<repository>
-			<id>oss-snapshot</id>
-			<url>http://oss.sonatype.org/content/repositories/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>

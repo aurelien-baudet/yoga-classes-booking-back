@@ -9,6 +9,6 @@ import lombok.Data;
 @Data
 public class BookingDto {
 	private Instant bookDate;
-	private User bookedBy;
+	private UserRef bookedBy;
 	private StudentRef student;
 }
