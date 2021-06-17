@@ -59,4 +59,9 @@ spring:
   freemarker:
     prefix: ""
     suffix: ""
-    
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

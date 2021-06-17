@@ -47,8 +47,17 @@ deployment:
 logging:
   level:
     fr.yoga.booking: DEBUG
-    #org.springframework.security: DEBUG
+#    org.springframework.security: DEBUG
 #    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:10080
+        instance:
+          metadata:
+            user.name: monitoring
+            user.password: monitoring
 
 #spring:
 #  security:

@@ -155,6 +155,9 @@ public class SubscriptionService {
 		if (nextClass.isCanceled()) {
 			return;
 		}
+		if (!stillBooked(nextClass, subscription.getSubscriber())) {
+			return;
+		}
 		remindToRenewSubscription(subscription);
 	}
 
@@ -224,5 +227,9 @@ public class SubscriptionService {
 
 	private boolean remedied(UserSubscriptions subscription) {
 		return !isExpiredOrAboutToExpire(subscription);
+	}
+
+	private boolean stillBooked(ScheduledClass nextClass, StudentRef subscriber) {
+		return nextClass.isApprovedFor(subscriber);
 	}
 }

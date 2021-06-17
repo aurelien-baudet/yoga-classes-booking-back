@@ -28,6 +28,8 @@ async:
   enabled: false
 scheduling:
   enabled: false
+monitoring:
+  enabled: false
 
 ogham:
   email:

@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,7 +24,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import de.codecentric.boot.admin.client.config.InstanceProperties;
 import fr.yoga.booking.service.technical.security.AnonymousUserDetails;
+import fr.yoga.booking.service.technical.security.AnyUserDetailsService;
+import fr.yoga.booking.service.technical.security.MonitoringUserDetailsService;
+import fr.yoga.booking.service.technical.security.RepositoryUserDetailsService;
 
 @Configuration
 public class SecurityConfig {
@@ -31,6 +36,22 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+	
+	@Bean
+	@Primary
+	public UserDetailsService userDetailsService(RepositoryUserDetailsService appUserDetailsService, @Autowired(required = false) MonitoringUserDetailsService monitoringUserDetailsService) {
+		return new AnyUserDetailsService(appUserDetailsService, monitoringUserDetailsService);
+	}
+	
+	@Configuration
+	@ConditionalOnProperty(name="monitoring.enabled", matchIfMissing=true)
+	public static class MonitoringConfiguration {
+		@Bean
+		public MonitoringUserDetailsService monitoringUserDetailsService(InstanceProperties monitoringInstanceProperties, PasswordEncoder passwordEncoder) {
+			return new MonitoringUserDetailsService(monitoringInstanceProperties, passwordEncoder);
+		}
+	}
+	
 
 	@Configuration
 	@ConditionalOnProperty(name="security.enabled", matchIfMissing=true)
@@ -82,11 +103,11 @@ public class SecurityConfig {
 					.antMatchers(GET, "/classes/bookings").permitAll()
 					.antMatchers(POST, "/classes/*/bookings").permitAll()
 					.antMatchers(DELETE, "/classes/*/bookings").permitAll()
+					.antMatchers("/actuator/**").hasAuthority("MONITORING")
 					.anyRequest().authenticated().and()
 		        ;
 		}
-	
-	
+		
 		@Bean
 		@ConfigurationProperties(prefix="cors")
 		public CorsConfiguration corsConfiguration() {
